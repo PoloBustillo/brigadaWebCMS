@@ -58,27 +58,27 @@ const mockAlerts: Alert[] = [
 const alertConfig = {
   error: {
     icon: AlertCircle,
-    bgColor: "bg-red-50",
-    iconColor: "text-red-600",
-    borderColor: "border-red-200",
+    bgColor: "bg-red-50 dark:bg-red-900/20",
+    iconColor: "text-red-600 dark:text-red-400",
+    borderColor: "border-red-200 dark:border-red-800",
   },
   warning: {
     icon: AlertTriangle,
-    bgColor: "bg-yellow-50",
-    iconColor: "text-yellow-600",
-    borderColor: "border-yellow-200",
+    bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
+    iconColor: "text-yellow-600 dark:text-yellow-400",
+    borderColor: "border-yellow-200 dark:border-yellow-800",
   },
   info: {
     icon: Info,
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-600",
-    borderColor: "border-blue-200",
+    bgColor: "bg-blue-50 dark:bg-blue-900/20",
+    iconColor: "text-blue-600 dark:text-blue-400",
+    borderColor: "border-blue-200 dark:border-blue-800",
   },
   success: {
     icon: CheckCircle,
-    bgColor: "bg-green-50",
-    iconColor: "text-green-600",
-    borderColor: "border-green-200",
+    bgColor: "bg-green-50 dark:bg-green-900/20",
+    iconColor: "text-green-600 dark:text-green-400",
+    borderColor: "border-green-200 dark:border-green-800",
   },
 };
 
@@ -86,55 +86,54 @@ export function SystemAlerts({ isOpen, onClose }: SystemAlertsProps) {
   const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
 
   const markAsRead = (id: number) => {
-    setAlerts(alerts.map(alert => 
-      alert.id === id ? { ...alert, read: true } : alert
-    ));
+    setAlerts(
+      alerts.map((alert) =>
+        alert.id === id ? { ...alert, read: true } : alert,
+      ),
+    );
   };
 
   const markAllAsRead = () => {
-    setAlerts(alerts.map(alert => ({ ...alert, read: true })));
+    setAlerts(alerts.map((alert) => ({ ...alert, read: true })));
   };
 
-  const unreadCount = alerts.filter(a => !a.read).length;
+  const unreadCount = alerts.filter((a) => !a.read).length;
 
   if (!isOpen) return null;
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-40" onClick={onClose} />
 
       {/* Alerts panel */}
-      <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[600px] flex flex-col">
+      <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-[600px] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Alertas del Sistema
             </h3>
             {unreadCount > 0 && (
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                 {unreadCount} sin leer
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
         {/* Actions */}
         {unreadCount > 0 && (
-          <div className="px-4 py-2 border-b border-gray-100">
+          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
             <button
               onClick={markAllAsRead}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
               Marcar todas como leídas
             </button>
@@ -145,16 +144,18 @@ export function SystemAlerts({ isOpen, onClose }: SystemAlertsProps) {
         <div className="flex-1 overflow-y-auto">
           {alerts.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
-              <p className="text-gray-600 font-medium">No hay alertas</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-gray-600 dark:text-gray-300 font-medium">
+                No hay alertas
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 El sistema está funcionando correctamente
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {alerts.map((alert) => {
                 const config = alertConfig[alert.type];
                 const Icon = config.icon;
@@ -163,8 +164,8 @@ export function SystemAlerts({ isOpen, onClose }: SystemAlertsProps) {
                   <div
                     key={alert.id}
                     className={cn(
-                      "p-4 hover:bg-gray-50 transition-colors cursor-pointer",
-                      !alert.read && "bg-primary-50/30",
+                      "p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer",
+                      !alert.read && "bg-primary-50/30 dark:bg-primary-900/10",
                     )}
                     onClick={() => markAsRead(alert.id)}
                   >
@@ -182,30 +183,30 @@ export function SystemAlerts({ isOpen, onClose }: SystemAlertsProps) {
                         <div className="flex items-start justify-between gap-2">
                           <h4
                             className={cn(
-                              "text-sm font-medium text-gray-900",
+                              "text-sm font-medium text-gray-900 dark:text-gray-100",
                               !alert.read && "font-semibold",
                             )}
                           >
                             {alert.title}
                           </h4>
                           {!alert.read && (
-                            <div className="w-2 h-2 bg-primary-600 rounded-full flex-shrink-0 mt-1.5" />
+                            <div className="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full flex-shrink-0 mt-1.5" />
                           )}
                         </div>
 
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {alert.message}
                         </p>
 
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 dark:text-gray-500">
                             {formatDateTime(alert.timestamp)}
                           </span>
 
                           {alert.actionLabel && (
                             <a
                               href={alert.actionUrl}
-                              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                              className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {alert.actionLabel} →
@@ -222,10 +223,10 @@ export function SystemAlerts({ isOpen, onClose }: SystemAlertsProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-200">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
           <a
             href="/dashboard/system-health"
-            className="block text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-1"
+            className="block text-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium py-1"
             onClick={onClose}
           >
             Ver todas las alertas

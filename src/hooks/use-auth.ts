@@ -26,7 +26,9 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
+      console.log("Attempting login for:", email);
       const authUser = await authService.login({ email, password });
+      console.log("Login successful, user:", authUser);
       login(authUser);
 
       // Set cookies for middleware
@@ -34,7 +36,11 @@ export function useAuth() {
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Error al iniciar sesión");
+      console.error("Login error:", err);
+      console.error("Error response:", err.response);
+      const errorMessage =
+        err.response?.data?.detail || err.message || "Error al iniciar sesión";
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);

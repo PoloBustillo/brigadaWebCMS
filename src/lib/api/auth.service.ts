@@ -31,6 +31,8 @@ export const authService = {
     formData.append("username", credentials.email);
     formData.append("password", credentials.password);
 
+    console.log("Sending login request...");
+
     const response = await apiClient.post<LoginResponse>(
       "/auth/login",
       formData,
@@ -41,11 +43,13 @@ export const authService = {
       },
     );
 
+    console.log("Login response:", response.data);
+
     return {
       ...response.data.user,
       access_token: response.data.access_token,
       refresh_token: response.data.refresh_token,
-    };
+    } as AuthUser;
   },
 
   /**

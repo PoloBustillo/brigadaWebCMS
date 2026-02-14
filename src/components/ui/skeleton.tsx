@@ -5,7 +5,12 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string;
 }
 
-export function Skeleton({ className, width, height, ...props }: SkeletonProps) {
+export function Skeleton({
+  className,
+  width,
+  height,
+  ...props
+}: SkeletonProps) {
   return (
     <div
       className={cn("animate-pulse bg-gray-200 rounded", className)}
@@ -39,11 +44,20 @@ export function SkeletonCard() {
   );
 }
 
-export function SkeletonTable({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
+export function SkeletonTable({
+  rows = 5,
+  columns = 4,
+}: {
+  rows?: number;
+  columns?: number;
+}) {
   return (
     <div className="bg-white rounded-lg shadow border border-gray-200">
       {/* Header */}
-      <div className="grid gap-4 p-4 border-b border-gray-200" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+      <div
+        className="grid gap-4 p-4 border-b border-gray-200"
+        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      >
         {Array.from({ length: columns }).map((_, i) => (
           <Skeleton key={i} className="h-4" />
         ))}

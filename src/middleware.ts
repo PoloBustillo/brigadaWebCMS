@@ -1,19 +1,34 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+/**
+ * Next.js Middleware for route protection
+ * Layer 1: Basic authentication check (token presence)
+ *
+ * Note: Role-based checks are handled client-side via useRole hook
+ * because JWT decoding on Edge runtime has limitations
+ */
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login");
-  const isProtectedRoute = request.nextUrl.pathname.startsWith("/dashboard");
+  const { pathname } = request.nextUrl;
 
-  // If user is not authenticated and trying to access protected route
+  const isAuthPage = pathname.startsWith("/login");
+  const isProtectedRoute = pathname.startsWith("/dashboard");
+
+  // Block unauthenticated users from protected routes
   if (!token && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    // Preserve attempted URL for redirect after login
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // If user is authenticated and trying to access auth page
+  // Redirect authenticated users away from login page
   if (token && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    // Check if there's a redirect parameter
+    const redirect = request.nextUrl.searchParams.get("redirect");
+    const targetUrl = redirect || "/dashboard";
+    return NextResponse.redirect(new URL(targetUrl, request.url));
   }
 
   return NextResponse.next();

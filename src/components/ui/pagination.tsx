@@ -1,4 +1,9 @@
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -20,10 +25,12 @@ export function Pagination({
 }: PaginationProps) {
   const pages = generatePaginationPages(currentPage, totalPages);
 
-  const startItem = totalItems && itemsPerPage ? (currentPage - 1) * itemsPerPage + 1 : null;
-  const endItem = totalItems && itemsPerPage 
-    ? Math.min(currentPage * itemsPerPage, totalItems) 
-    : null;
+  const startItem =
+    totalItems && itemsPerPage ? (currentPage - 1) * itemsPerPage + 1 : null;
+  const endItem =
+    totalItems && itemsPerPage
+      ? Math.min(currentPage * itemsPerPage, totalItems)
+      : null;
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
@@ -62,7 +69,10 @@ export function Pagination({
         <div className="hidden sm:flex items-center gap-1">
           {pages.map((page, index) =>
             page === "..." ? (
-              <span key={`ellipsis-${index}`} className="px-3 py-1 text-gray-500">
+              <span
+                key={`ellipsis-${index}`}
+                className="px-3 py-1 text-gray-500"
+              >
                 ...
               </span>
             ) : (

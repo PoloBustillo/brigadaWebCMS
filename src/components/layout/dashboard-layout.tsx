@@ -9,21 +9,24 @@ import { cn } from "@/lib/utils";
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isChecking } = useRequireAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
+    useState(false);
 
   if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-sm text-gray-600">Cargando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400 mx-auto"></div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Cargando...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar
         isOpen={isMobileMenuOpen}
         setIsOpen={setIsMobileMenuOpen}
@@ -41,9 +44,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         <main className="p-4 lg:p-6">
           {/* Main content container with max-width for better readability */}
-          <div className="max-w-[1600px] mx-auto">
-            {children}
-          </div>
+          <div className="max-w-[1600px] mx-auto">{children}</div>
         </main>
       </div>
     </div>

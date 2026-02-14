@@ -17,14 +17,18 @@ export function Table({ children, className }: TableProps) {
 
 export function TableHeader({ children }: { children: React.ReactNode }) {
   return (
-    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+    <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       {children}
     </thead>
   );
 }
 
 export function TableBody({ children }: { children: React.ReactNode }) {
-  return <tbody className="divide-y divide-gray-200">{children}</tbody>;
+  return (
+    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+      {children}
+    </tbody>
+  );
 }
 
 export function TableRow({
@@ -40,7 +44,8 @@ export function TableRow({
     <tr
       onClick={onClick}
       className={cn(
-        onClick && "cursor-pointer hover:bg-gray-50 transition-colors",
+        onClick &&
+          "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
         className,
       )}
     >
@@ -74,7 +79,9 @@ export function TableCell({
   className?: string;
 }) {
   return (
-    <td className={cn("px-6 py-4 text-gray-900", className)}>{children}</td>
+    <td className={cn("px-6 py-4 text-gray-900 dark:text-gray-100", className)}>
+      {children}
+    </td>
   );
 }
 

@@ -23,9 +23,10 @@ export function Card({
   return (
     <div
       className={cn(
-        "bg-white rounded-lg shadow border border-gray-200",
+        "bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700",
         paddingClasses[padding],
-        hover && "transition-shadow hover:shadow-md",
+        hover &&
+          "transition-shadow hover:shadow-md dark:hover:shadow-gray-900/70",
         className,
       )}
       {...props}
@@ -45,9 +46,13 @@ export function CardHeader({ title, description, action }: CardHeaderProps) {
   return (
     <div className="flex items-start justify-between mb-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {title}
+        </h2>
         {description && (
-          <p className="text-sm text-gray-600 mt-1">{description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {description}
+          </p>
         )}
       </div>
       {action && <div>{action}</div>}
@@ -73,7 +78,12 @@ export function CardFooter({
   className?: string;
 }) {
   return (
-    <div className={cn("mt-6 pt-6 border-t border-gray-200", className)}>
+    <div
+      className={cn(
+        "mt-6 pt-6 border-t border-gray-200 dark:border-gray-700",
+        className,
+      )}
+    >
       {children}
     </div>
   );
