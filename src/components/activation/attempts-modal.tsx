@@ -67,7 +67,10 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
     if (eventType === "activation_failed") {
       return <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />;
     }
-    if (eventType === "code_validation_attempt" || eventType === "activation_attempt") {
+    if (
+      eventType === "code_validation_attempt" ||
+      eventType === "activation_attempt"
+    ) {
       return <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
     }
     return (
@@ -86,7 +89,10 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
     ) {
       return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
     }
-    if (eventType === "code_validation_attempt" || eventType === "activation_attempt") {
+    if (
+      eventType === "code_validation_attempt" ||
+      eventType === "activation_attempt"
+    ) {
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
     }
     return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
@@ -104,7 +110,9 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4">
           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-muted-foreground mb-1">Eventos totales</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              Eventos totales
+            </p>
             <p className="text-2xl font-bold">{auditLogs.length}</p>
           </div>
           <div className="p-3 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800">
@@ -116,7 +124,9 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
             </p>
           </div>
           <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-muted-foreground mb-1">Estado del codigo</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              Estado del codigo
+            </p>
             <p className="text-sm font-semibold capitalize mt-1">
               {code.status}
             </p>
@@ -132,9 +142,9 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
                 {code.status === "locked" ? "Codigo bloqueado" : "Riesgo alto"}
               </h4>
               <p className="text-sm text-red-800 dark:text-red-200">
-                  {code.status === "locked"
-                    ? "Este codigo fue bloqueado por demasiados intentos fallidos."
-                    : "Este codigo esta cerca del limite de intentos fallidos."}
+                {code.status === "locked"
+                  ? "Este codigo fue bloqueado por demasiados intentos fallidos."
+                  : "Este codigo esta cerca del limite de intentos fallidos."}
               </p>
             </div>
           </div>
@@ -203,8 +213,13 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
                           </div>
                         ) : log.request_metadata ? (
                           <div className="text-xs text-muted-foreground">
-                            {JSON.stringify(log.request_metadata, null, 2).slice(0, 50)}
-                            {JSON.stringify(log.request_metadata).length > 50 && "..."}
+                            {JSON.stringify(
+                              log.request_metadata,
+                              null,
+                              2,
+                            ).slice(0, 50)}
+                            {JSON.stringify(log.request_metadata).length > 50 &&
+                              "..."}
                           </div>
                         ) : (
                           <span className="text-muted-foreground text-xs">

@@ -60,7 +60,10 @@ const mapAuditLog = (log: any) => ({
   activation_code_id: log.activation_code_id,
   whitelist_id: log.whitelist_id,
   whitelist_entry: log.whitelist_identifier
-    ? { identifier: log.whitelist_identifier, full_name: log.whitelist_full_name }
+    ? {
+        identifier: log.whitelist_identifier,
+        full_name: log.whitelist_full_name,
+      }
     : undefined,
   identifier_attempted: log.identifier_attempted,
   ip_address: log.ip_address,

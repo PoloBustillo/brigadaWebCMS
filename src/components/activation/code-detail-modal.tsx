@@ -65,7 +65,9 @@ export function CodeDetailModal({
 
         {/* User Information */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Informacion del usuario</h3>
+          <h3 className="text-lg font-semibold mb-3">
+            Informacion del usuario
+          </h3>
           <div className="space-y-0">
             <InfoRow
               icon={User}

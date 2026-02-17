@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, CheckCircle2, Lock, Mail, User, Save } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Lock,
+  Mail,
+  User,
+  Save,
+} from "lucide-react";
 import { userService } from "@/lib/api/user.service";
 
 interface SettingsForm {
@@ -32,7 +39,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "password" | "system">(
-    "profile"
+    "profile",
   );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -55,11 +62,10 @@ export default function SettingsPage() {
     // Simular carga de datos del usuario
     setTimeout(() => {
       if (currentUser) {
-        const [firstName, ...lastNameParts] = (currentUser.name || "").split(" ");
         setFormData((prev) => ({
           ...prev,
-          firstName: firstName || "",
-          lastName: lastNameParts.join(" ") || "",
+          firstName: currentUser.nombre || "",
+          lastName: currentUser.apellido || "",
           email: currentUser.email || "",
         }));
       }
@@ -160,7 +166,9 @@ export default function SettingsPage() {
         {successMessage && (
           <div className="mb-6 flex items-center gap-3 rounded-lg bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800">
             <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-            <p className="text-green-800 dark:text-green-200">{successMessage}</p>
+            <p className="text-green-800 dark:text-green-200">
+              {successMessage}
+            </p>
           </div>
         )}
 
@@ -289,7 +297,8 @@ export default function SettingsPage() {
             <div className="space-y-6">
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Utiliza una contraseña fuerte con al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números.
+                  Utiliza una contraseña fuerte con al menos 8 caracteres,
+                  incluyendo mayúsculas, minúsculas y números.
                 </p>
               </div>
 

@@ -60,12 +60,8 @@ export default function WhitelistPage() {
     clearError,
   } = useWhitelistStore();
 
-  const {
-    generateCode,
-    showGeneratedCode,
-    generatedCode,
-    clearGeneratedCode,
-  } = useActivationCodeStore();
+  const { generateCode, showGeneratedCode, generatedCode, clearGeneratedCode } =
+    useActivationCodeStore();
 
   useEffect(() => {
     fetchEntries();
@@ -95,15 +91,18 @@ export default function WhitelistPage() {
 
   const handleExtendCode = async (whitelistId: number) => {
     try {
-      const entry = entries.find(e => e.id === whitelistId);
+      const entry = entries.find((e) => e.id === whitelistId);
       if (!entry?.has_active_code) return;
 
       // Fetch codes to find the active one for this whitelist entry
-      const codesResponse = await activationCodeService.list({ whitelist_id: whitelistId, status: "active" });
+      const codesResponse = await activationCodeService.list({
+        whitelist_id: whitelistId,
+        status: "active",
+      });
       if (codesResponse.items.length === 0) {
         throw new Error("No active code found");
       }
-      
+
       const activeCodeId = codesResponse.items[0].id;
       await useActivationCodeStore.getState().extendCode(activeCodeId, 24);
       await fetchEntries();
@@ -115,11 +114,14 @@ export default function WhitelistPage() {
   const handleResendEmail = async (whitelistId: number) => {
     try {
       // Fetch codes to find the active one for this whitelist entry
-      const codesResponse = await activationCodeService.list({ whitelist_id: whitelistId, status: "active" });
+      const codesResponse = await activationCodeService.list({
+        whitelist_id: whitelistId,
+        status: "active",
+      });
       if (codesResponse.items.length === 0) {
         throw new Error("No active code found");
       }
-      
+
       const activeCodeId = codesResponse.items[0].id;
       await useActivationCodeStore.getState().resendEmail(activeCodeId);
       await fetchEntries();
@@ -130,7 +132,7 @@ export default function WhitelistPage() {
 
   const handleDeleteEntry = async (whitelistId: number) => {
     if (!confirm("¿Estás seguro de eliminar esta invitación?")) return;
-    
+
     try {
       await useWhitelistStore.getState().deleteEntry(whitelistId);
       await fetchEntries();
@@ -147,7 +149,9 @@ export default function WhitelistPage() {
         <div className="absolute bottom-0 left-0 h-20 w-20 rounded-full bg-emerald-400/20 blur-2xl" />
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">Pre-autorizaciones</p>
+            <p className="text-sm font-medium text-gray-500">
+              Pre-autorizaciones
+            </p>
             <h1 className="font-display text-3xl font-semibold text-gray-900">
               Whitelist de usuarios
             </h1>
@@ -259,9 +263,7 @@ export default function WhitelistPage() {
           <Select
             value={statusFilter}
             onChange={(e) =>
-              setStatusFilter(
-                e.target.value as "all" | "pending" | "activated",
-              )
+              setStatusFilter(e.target.value as "all" | "pending" | "activated")
             }
           >
             <option value="all">Todos</option>

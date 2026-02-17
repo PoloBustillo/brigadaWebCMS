@@ -49,8 +49,8 @@ export function CodeGeneratedModal({
               Importante: guarda este codigo ahora
             </h3>
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Esta es la unica vez que veras el codigo en texto plano. Copialo
-              y envialo al usuario de forma segura.
+              Esta es la unica vez que veras el codigo en texto plano. Copialo y
+              envialo al usuario de forma segura.
             </p>
           </div>
         </div>

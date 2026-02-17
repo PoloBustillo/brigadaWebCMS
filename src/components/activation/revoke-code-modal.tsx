@@ -140,8 +140,8 @@ export function RevokeCodeModal({
         <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <p className="text-xs text-muted-foreground">
             <strong>Nota:</strong> Puedes generar un nuevo codigo para este
-            usuario cuando lo necesites. La revocacion quedara registrada en
-            la auditoria.
+            usuario cuando lo necesites. La revocacion quedara registrada en la
+            auditoria.
           </p>
         </div>
       </div>

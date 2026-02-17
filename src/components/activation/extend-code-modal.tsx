@@ -109,7 +109,9 @@ export function ExtendCodeModal({
                     : "font-medium"
                 }
               >
-                {currentExpiry ? format(currentExpiry, "PPpp") : "Sin vencimiento"}
+                {currentExpiry
+                  ? format(currentExpiry, "PPpp")
+                  : "Sin vencimiento"}
               </span>
             </p>
           </div>

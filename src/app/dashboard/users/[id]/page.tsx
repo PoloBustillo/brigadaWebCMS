@@ -6,7 +6,12 @@ import { useParams, useRouter } from "next/navigation";
 import { AdminGuard } from "@/components/auth/admin-guard";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useAuthStore } from "@/store/auth-store";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -199,9 +204,12 @@ export default function UserDetailPage() {
         <Card>
           <CardHeader
             title="Informacion del usuario"
-            description={`ID ${user?.id} • Creado ${new Intl.DateTimeFormat("es-MX", {
-              dateStyle: "medium",
-            }).format(new Date(user?.created_at || ""))}`}
+            description={`ID ${user?.id} • Creado ${new Intl.DateTimeFormat(
+              "es-MX",
+              {
+                dateStyle: "medium",
+              },
+            ).format(new Date(user?.created_at || ""))}`}
           />
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
@@ -236,9 +244,7 @@ export default function UserDetailPage() {
               <Select
                 label="Rol"
                 value={formData.rol}
-                onChange={(e) =>
-                  updateField("rol", e.target.value as UserRole)
-                }
+                onChange={(e) => updateField("rol", e.target.value as UserRole)}
               >
                 <option value="admin">Admin</option>
                 <option value="encargado">Encargado</option>
@@ -247,7 +253,9 @@ export default function UserDetailPage() {
               <Select
                 label="Estado"
                 value={formData.activo ? "active" : "inactive"}
-                onChange={(e) => updateField("activo", e.target.value === "active")}
+                onChange={(e) =>
+                  updateField("activo", e.target.value === "active")
+                }
                 disabled={currentUser?.id === user?.id}
               >
                 <option value="active">Activo</option>

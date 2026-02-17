@@ -56,8 +56,7 @@ export default function UsersPage() {
         page: currentPage,
         size: PAGE_SIZE,
         rol: roleFilter === "all" ? undefined : roleFilter,
-        activo:
-          statusFilter === "all" ? undefined : statusFilter === "active",
+        activo: statusFilter === "all" ? undefined : statusFilter === "active",
         search: searchTerm.trim() || undefined,
       });
       setUsers(response.items);
@@ -117,7 +116,9 @@ export default function UsersPage() {
           <div className="absolute bottom-0 left-0 h-20 w-20 rounded-full bg-emerald-400/20 blur-2xl" />
           <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Administracion</p>
+              <p className="text-sm font-medium text-gray-500">
+                Administracion
+              </p>
               <h1 className="font-display text-3xl font-semibold text-gray-900">
                 Usuarios
               </h1>

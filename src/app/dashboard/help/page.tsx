@@ -37,7 +37,7 @@ export default function HelpPage() {
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -77,7 +77,8 @@ export default function HelpPage() {
           Ayuda y Soporte
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Encuentra respuestas a preguntas comunes, reporta problemas y accede a documentación
+          Encuentra respuestas a preguntas comunes, reporta problemas y accede a
+          documentación
         </p>
       </div>
 
@@ -173,7 +174,8 @@ export default function HelpPage() {
             <div className="mb-6 flex items-center gap-3 rounded-lg bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800">
               <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
               <p className="text-green-800 dark:text-green-200">
-                Tu reporte ha sido enviado exitosamente. Nuestro equipo lo revisará pronto.
+                Tu reporte ha sido enviado exitosamente. Nuestro equipo lo
+                revisará pronto.
               </p>
             </div>
           )}
@@ -183,7 +185,8 @@ export default function HelpPage() {
               <div className="flex gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Por favor, describe el problema de manera clara y detallada. Incluye pasos para reproducirlo si es posible.
+                  Por favor, describe el problema de manera clara y detallada.
+                  Incluye pasos para reproducirlo si es posible.
                 </p>
               </div>
             </div>
@@ -231,7 +234,9 @@ export default function HelpPage() {
                 >
                   <option value="low">Baja - Inconveniente menor</option>
                   <option value="medium">Media - Funcionalidad afectada</option>
-                  <option value="high">Alta - Característica no funciona</option>
+                  <option value="high">
+                    Alta - Característica no funciona
+                  </option>
                   <option value="critical">Crítica - Sistema inusable</option>
                 </select>
               </div>
@@ -323,7 +328,8 @@ export default function HelpPage() {
                   1.
                 </span>
                 <span>
-                  <strong>Crear una Encuesta:</strong> Ve a Encuestas > Nueva Encuesta
+                  <strong>Crear una Encuesta:</strong> Ve a Encuestas &gt; Nueva
+                  Encuesta
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -331,7 +337,8 @@ export default function HelpPage() {
                   2.
                 </span>
                 <span>
-                  <strong>Invitar Usuarios:</strong> Ve a Usuarios > Invitaciones y genera códigos de activación
+                  <strong>Invitar Usuarios:</strong> Ve a Usuarios &gt;
+                  Invitaciones y genera códigos de activación
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -339,7 +346,8 @@ export default function HelpPage() {
                   3.
                 </span>
                 <span>
-                  <strong>Crear Asignaciones:</strong> Ve a Asignaciones para asignar encuestas a brigadistas
+                  <strong>Crear Asignaciones:</strong> Ve a Asignaciones para
+                  asignar encuestas a brigadistas
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -347,7 +355,8 @@ export default function HelpPage() {
                   4.
                 </span>
                 <span>
-                  <strong>Ver Reportes:</strong> Ve a Reportes para ver estadísticas y análisis de respuestas
+                  <strong>Ver Reportes:</strong> Ve a Reportes para ver
+                  estadísticas y análisis de respuestas
                 </span>
               </li>
             </ul>
@@ -359,16 +368,20 @@ export default function HelpPage() {
             </h3>
             <div className="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
               <p>
-                <strong>Autorización:</strong> El sistema utiliza JWT (JSON Web Tokens) para autenticar usuarios.
+                <strong>Autorización:</strong> El sistema utiliza JWT (JSON Web
+                Tokens) para autenticar usuarios.
               </p>
               <p>
-                <strong>Contraseñas:</strong> Las contraseñas se almacenan de forma segura usando hash bcrypt.
+                <strong>Contraseñas:</strong> Las contraseñas se almacenan de
+                forma segura usando hash bcrypt.
               </p>
               <p>
-                <strong>Roles:</strong> Los permisos se basan en roles de usuario. Cada rol tiene acceso limitado según su nivel.
+                <strong>Roles:</strong> Los permisos se basan en roles de
+                usuario. Cada rol tiene acceso limitado según su nivel.
               </p>
               <p>
-                <strong>HTTPS:</strong> Todas las comunicaciones se realizan a través de conexiones encriptadas.
+                <strong>HTTPS:</strong> Todas las comunicaciones se realizan a
+                través de conexiones encriptadas.
               </p>
             </div>
           </Card>
@@ -378,10 +391,16 @@ export default function HelpPage() {
               💡 Tips y Trucos
             </h3>
             <ul className="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
-              <li>• Usa el atajo Cmd+K (Mac) o Ctrl+K (Windows) para búsqueda rápida</li>
+              <li>
+                • Usa el atajo Cmd+K (Mac) o Ctrl+K (Windows) para búsqueda
+                rápida
+              </li>
               <li>• Puedes generar múltiples códigos de invitación a la vez</li>
               <li>• Los reportes se pueden exportar en formato CSV</li>
-              <li>• Usa temas oscuros para reducir fatiga visual en sesiones largas</li>
+              <li>
+                • Usa temas oscuros para reducir fatiga visual en sesiones
+                largas
+              </li>
             </ul>
           </Card>
 
@@ -390,10 +409,12 @@ export default function HelpPage() {
               ✨ Novedades
             </h3>
             <p className="text-green-800 dark:text-green-300 mb-2">
-              <strong>Versión 1.0.0:</strong> Lanzamiento inicial del Brigada CMS
+              <strong>Versión 1.0.0:</strong> Lanzamiento inicial del Brigada
+              CMS
             </p>
             <p className="text-green-700 dark:text-green-400 text-sm">
-              Características: Gestión de usuarios, Encuestas, Asignaciones, Reportes y Sistema de Invitaciones
+              Características: Gestión de usuarios, Encuestas, Asignaciones,
+              Reportes y Sistema de Invitaciones
             </p>
           </Card>
         </div>

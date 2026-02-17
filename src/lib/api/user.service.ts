@@ -98,8 +98,7 @@ export const userService = {
    */
   async getUsersPaginated(
     params?: GetUsersParams,
-  ): Promise<{ items: User[]; total: number }>
-  {
+  ): Promise<{ items: User[]; total: number }> {
     const limit = params?.size || 100;
     const page = params?.page || 1;
     const response = await apiClient.get<User[]>("/users", {
@@ -170,10 +169,13 @@ export const userService = {
   /**
    * Reset user password
    */
-  async resetPassword(id: number): Promise<{ message: string; temporary_password: string }> {
-    const response = await apiClient.post<{ message: string; temporary_password: string }>(
-      `/users/${id}/reset-password`
-    );
+  async resetPassword(
+    id: number,
+  ): Promise<{ message: string; temporary_password: string }> {
+    const response = await apiClient.post<{
+      message: string;
+      temporary_password: string;
+    }>(`/users/${id}/reset-password`);
     return response.data;
   },
 };

@@ -29,7 +29,9 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={`${fontBody.variable} ${fontDisplay.variable} antialiased`}>
+      <body
+        className={`${fontBody.variable} ${fontDisplay.variable} antialiased`}
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

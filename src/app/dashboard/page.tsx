@@ -127,9 +127,11 @@ export default function DashboardPage() {
       <div className="relative overflow-hidden rounded-2xl border border-primary-200/60 dark:border-gray-800 bg-gradient-to-br from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:via-primary-800/30 dark:to-primary-900/50 p-8 shadow-sm dark:shadow-lg">
         <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary-200/20 dark:bg-white/10 blur-3xl" />
         <div className="absolute left-0 bottom-0 h-32 w-32 rounded-full bg-primary-100/20 dark:bg-white/5 blur-2xl" />
-        
+
         <div className="relative z-10">
-          <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-2">Dashboard</h1>
+          <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-2">
+            Dashboard
+          </h1>
           <p className="text-primary-700 dark:text-primary-100 text-lg">
             Bienvenido a tu panel de control de Brigada
           </p>
@@ -155,7 +157,9 @@ export default function DashboardPage() {
 
               <div className="relative p-6">
                 {/* Icon Container */}
-                <div className={`inline-flex p-3 rounded-lg ${card.bgColor} mb-4`}>
+                <div
+                  className={`inline-flex p-3 rounded-lg ${card.bgColor} mb-4`}
+                >
                   <Icon className={`h-6 w-6 ${card.textColor}`} />
                 </div>
 
@@ -202,9 +206,7 @@ export default function DashboardPage() {
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     {card.title}
                   </h3>
-                  <div
-                    className={`inline-flex p-2 rounded-lg ${card.bgColor}`}
-                  >
+                  <div className={`inline-flex p-2 rounded-lg ${card.bgColor}`}>
                     <Icon className={`h-5 w-5 ${card.color}`} />
                   </div>
                 </div>
@@ -250,7 +252,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="font-semibold text-primary-600 dark:text-primary-400">
                   {stats.completedAssignments > 0
-                    ? (stats.totalResponses / stats.completedAssignments).toFixed(1)
+                    ? (
+                        stats.totalResponses / stats.completedAssignments
+                      ).toFixed(1)
                     : 0}
                 </span>
               </div>

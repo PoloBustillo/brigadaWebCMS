@@ -21,7 +21,9 @@ export function ResetPasswordModal({
   userName,
 }: ResetPasswordModalProps) {
   const [isResetting, setIsResetting] = useState(false);
-  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -77,8 +79,9 @@ export function ResetPasswordModal({
             </p>
             <Card className="border-amber-200 bg-amber-50/70 text-amber-800">
               <p className="text-sm font-medium">
-                ⚠️ La contrasena temporal se mostrara <strong>una sola vez</strong>.
-                Asegurate de copiarla antes de cerrar.
+                ⚠️ La contrasena temporal se mostrara{" "}
+                <strong>una sola vez</strong>. Asegurate de copiarla antes de
+                cerrar.
               </p>
             </Card>
           </>
