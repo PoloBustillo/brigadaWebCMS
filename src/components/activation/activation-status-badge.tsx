@@ -22,31 +22,31 @@ interface StatusConfig {
 
 const statusConfig: Record<ActivationCodeStatus, StatusConfig> = {
   active: {
-    label: "Active",
+    label: "Activo",
     colorClasses:
       "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-200 dark:border-green-800",
     icon: CheckCircle2,
   },
   used: {
-    label: "Used",
+    label: "Usado",
     colorClasses:
       "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800",
     icon: CheckCircle2,
   },
   expired: {
-    label: "Expired",
+    label: "Expirado",
     colorClasses:
       "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 border-orange-200 dark:border-orange-800",
     icon: Clock,
   },
   revoked: {
-    label: "Revoked",
+    label: "Revocado",
     colorClasses:
       "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-200 dark:border-red-800",
     icon: Ban,
   },
   locked: {
-    label: "Locked",
+    label: "Bloqueado",
     colorClasses:
       "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 border-gray-200 dark:border-gray-800",
     icon: Lock,

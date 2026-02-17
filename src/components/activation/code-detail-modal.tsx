@@ -7,9 +7,7 @@ import { ActivationCode } from "@/types/activation";
 import { format } from "date-fns";
 import {
   User,
-  Mail,
-  Phone,
-  IdCard,
+  BadgeCheck,
   Calendar,
   Clock,
   Shield,
@@ -54,29 +52,29 @@ export function CodeDetailModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Activation Code Details"
+      title="Detalles del codigo de activacion"
       size="lg"
-      footer={<Button onClick={onClose}>Close</Button>}
+      footer={<Button onClick={onClose}>Cerrar</Button>}
     >
       <div className="space-y-6">
         {/* Status */}
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Status</h3>
+          <h3 className="text-lg font-semibold">Estado</h3>
           <ActivationStatusBadge status={code.status} />
         </div>
 
         {/* User Information */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">User Information</h3>
+          <h3 className="text-lg font-semibold mb-3">Informacion del usuario</h3>
           <div className="space-y-0">
             <InfoRow
               icon={User}
-              label="Full Name"
+              label="Nombre completo"
               value={`${code.whitelist.nombre} ${code.whitelist.apellido}`}
             />
             <InfoRow
-              icon={IdCard}
-              label="Identifier"
+              icon={BadgeCheck}
+              label="Identificador"
               value={
                 <div className="flex items-center gap-2">
                   <span className="font-mono">{code.whitelist.identifier}</span>
@@ -88,7 +86,7 @@ export function CodeDetailModal({
             />
             <InfoRow
               icon={Shield}
-              label="Assigned Role"
+              label="Rol asignado"
               value={
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
                   {code.whitelist.assigned_role}
@@ -107,17 +105,17 @@ export function CodeDetailModal({
 
         {/* Code Information */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Code Information</h3>
+          <h3 className="text-lg font-semibold mb-3">Informacion del codigo</h3>
           <div className="space-y-0">
             <InfoRow
               icon={Calendar}
-              label="Created At"
+              label="Creado"
               value={formatDate(code.created_at)}
             />
             {code.expires_at && (
               <InfoRow
                 icon={Clock}
-                label="Expires At"
+                label="Vence"
                 value={
                   <span
                     className={
@@ -134,23 +132,23 @@ export function CodeDetailModal({
             {code.used_at && (
               <InfoRow
                 icon={Calendar}
-                label="Used At"
+                label="Usado"
                 value={formatDate(code.used_at)}
               />
             )}
             {code.revoked_at && (
               <InfoRow
                 icon={Calendar}
-                label="Revoked At"
+                label="Revocado"
                 value={formatDate(code.revoked_at)}
               />
             )}
             <InfoRow
               icon={Shield}
-              label="Attempts"
+              label="Intentos"
               value={
                 <span>
-                  {code.failed_attempts} / {code.max_attempts} failed attempts
+                  {code.failed_attempts} / {code.max_attempts} intentos fallidos
                 </span>
               }
             />
@@ -160,12 +158,12 @@ export function CodeDetailModal({
         {/* Additional Information */}
         {(code.revoke_reason || code.whitelist.notes) && (
           <div>
-            <h3 className="text-lg font-semibold mb-3">Additional Notes</h3>
+            <h3 className="text-lg font-semibold mb-3">Notas adicionales</h3>
             <div className="space-y-0">
               {code.revoke_reason && (
                 <InfoRow
                   icon={FileText}
-                  label="Revoke Reason"
+                  label="Motivo de revocacion"
                   value={
                     <p className="text-sm text-red-600 dark:text-red-400">
                       {code.revoke_reason}
@@ -176,7 +174,7 @@ export function CodeDetailModal({
               {code.whitelist.notes && (
                 <InfoRow
                   icon={FileText}
-                  label="Notes"
+                  label="Notas"
                   value={<p className="text-sm">{code.whitelist.notes}</p>}
                 />
               )}
@@ -187,7 +185,7 @@ export function CodeDetailModal({
         {/* Code Hash (for reference) */}
         <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <p className="text-xs font-medium text-muted-foreground mb-1">
-            Code Hash (Bcrypt)
+            Hash del codigo (bcrypt)
           </p>
           <code className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
             {code.code_hash}

@@ -31,17 +31,19 @@ interface AttemptsModalProps {
 }
 
 const eventTypeLabels: Record<string, string> = {
-  code_generated: "Generated",
-  code_regenerated: "Regenerated",
-  attempted_use: "Attempt",
-  successful_use: "Success",
-  failed_use: "Failed",
-  code_revoked: "Revoked",
-  code_extended: "Extended",
-  email_sent: "Email Sent",
-  email_resent: "Email Resent",
-  code_expired: "Expired",
-  code_locked: "Locked",
+  code_generated: "Generado",
+  code_extended: "Extendido",
+  code_validation_attempt: "Validacion",
+  code_validation_success: "Validado",
+  activation_attempt: "Intento de activacion",
+  activation_success: "Activacion exitosa",
+  activation_failed: "Activacion fallida",
+  code_revoked: "Revocado",
+  email_sent: "Email enviado",
+  email_resent: "Email reenviado",
+  code_expired: "Expirado",
+  code_locked: "Bloqueado",
+  rate_limit_exceeded: "Limite excedido",
 };
 
 export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
@@ -62,10 +64,10 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
     if (eventType === "code_revoked" || eventType === "code_locked") {
       return <Shield className="w-4 h-4 text-red-600 dark:text-red-400" />;
     }
-    if (eventType === "failed_use") {
+    if (eventType === "activation_failed") {
       return <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />;
     }
-    if (eventType === "attempted_use") {
+    if (eventType === "code_validation_attempt" || eventType === "activation_attempt") {
       return <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
     }
     return (
@@ -80,11 +82,11 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
     if (
       eventType === "code_revoked" ||
       eventType === "code_locked" ||
-      eventType === "failed_use"
+      eventType === "activation_failed"
     ) {
       return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
     }
-    if (eventType === "attempted_use") {
+    if (eventType === "code_validation_attempt" || eventType === "activation_attempt") {
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
     }
     return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
@@ -94,27 +96,27 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Activation Attempts & Audit Log"
+      title="Intentos y auditoria"
       size="xl"
-      footer={<Button onClick={onClose}>Close</Button>}
+      footer={<Button onClick={onClose}>Cerrar</Button>}
     >
       <div className="space-y-4">
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4">
           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-muted-foreground mb-1">Total Events</p>
+            <p className="text-xs text-muted-foreground mb-1">Eventos totales</p>
             <p className="text-2xl font-bold">{auditLogs.length}</p>
           </div>
           <div className="p-3 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800">
             <p className="text-xs text-muted-foreground mb-1">
-              Failed Attempts
+              Intentos fallidos
             </p>
             <p className="text-2xl font-bold text-red-600 dark:text-red-400">
               {code.failed_attempts} / {code.max_attempts}
             </p>
           </div>
           <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-muted-foreground mb-1">Code Status</p>
+            <p className="text-xs text-muted-foreground mb-1">Estado del codigo</p>
             <p className="text-sm font-semibold capitalize mt-1">
               {code.status}
             </p>
@@ -127,12 +129,12 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
             <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
-                {code.status === "locked" ? "Code Locked" : "High Risk"}
+                {code.status === "locked" ? "Codigo bloqueado" : "Riesgo alto"}
               </h4>
               <p className="text-sm text-red-800 dark:text-red-200">
-                {code.status === "locked"
-                  ? "This code has been locked due to too many failed attempts."
-                  : "This code is approaching the maximum failed attempt limit."}
+                  {code.status === "locked"
+                    ? "Este codigo fue bloqueado por demasiados intentos fallidos."
+                    : "Este codigo esta cerca del limite de intentos fallidos."}
               </p>
             </div>
           </div>
@@ -140,7 +142,7 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
 
         {/* Audit Log Table */}
         <div>
-          <h4 className="text-sm font-semibold mb-2">Audit Trail</h4>
+          <h4 className="text-sm font-semibold mb-2">Auditoria</h4>
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -151,8 +153,8 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
             <Table>
               <TableBody>
                 <TableEmpty
-                  message="No audit logs found"
-                  description="Activity will appear here once events occur"
+                  message="Sin eventos registrados"
+                  description="Los eventos apareceran aqui cuando ocurran"
                 />
               </TableBody>
             </Table>
@@ -161,10 +163,10 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>IP Address</TableHead>
-                    <TableHead>Details</TableHead>
+                    <TableHead>Evento</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>IP</TableHead>
+                    <TableHead>Detalle</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -199,14 +201,14 @@ export function AttemptsModal({ isOpen, code, onClose }: AttemptsModalProps) {
                           <div className="text-xs text-red-600 dark:text-red-400">
                             {log.failure_reason}
                           </div>
-                        ) : log.metadata ? (
+                        ) : log.request_metadata ? (
                           <div className="text-xs text-muted-foreground">
-                            {JSON.stringify(log.metadata, null, 2).slice(0, 50)}
-                            {JSON.stringify(log.metadata).length > 50 && "..."}
+                            {JSON.stringify(log.request_metadata, null, 2).slice(0, 50)}
+                            {JSON.stringify(log.request_metadata).length > 50 && "..."}
                           </div>
                         ) : (
                           <span className="text-muted-foreground text-xs">
-                            No details
+                            Sin detalles
                           </span>
                         )}
                       </TableCell>

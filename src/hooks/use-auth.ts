@@ -95,18 +95,20 @@ export function useAuth() {
  */
 export function useRequireAuth() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, hasHydrated } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.push("/login");
-      } else {
-        setIsChecking(false);
-      }
+    if (!hasHydrated || isLoading) {
+      return;
     }
-  }, [isAuthenticated, isLoading, router]);
+
+    if (!isAuthenticated) {
+      router.push("/login");
+    } else {
+      setIsChecking(false);
+    }
+  }, [hasHydrated, isAuthenticated, isLoading, router]);
 
   return { isChecking };
 }

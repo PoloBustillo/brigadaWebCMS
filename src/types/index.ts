@@ -9,7 +9,9 @@ export interface User {
   apellido: string;
   rol: UserRole;
   telefono?: string;
+  avatar_url?: string;
   created_at: string;
+  updated_at?: string;
   activo: boolean;
 }
 

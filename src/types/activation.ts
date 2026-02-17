@@ -19,6 +19,8 @@ export interface WhitelistEntry {
   assigned_supervisor_id?: number;
   assigned_supervisor_name?: string;
   is_activated: boolean;
+  has_active_code?: boolean;
+  code_expires_at?: string;
   activated_user_id?: number;
   activated_user_name?: string;
   activated_at?: string;
@@ -26,6 +28,14 @@ export interface WhitelistEntry {
   created_by_name?: string;
   created_at: string;
   updated_at: string;
+  notes?: string;
+}
+
+export interface WhitelistUpdate {
+  full_name?: string;
+  assigned_role?: UserRole;
+  assigned_supervisor_id?: number;
+  phone?: string;
   notes?: string;
 }
 
@@ -71,6 +81,7 @@ export interface ActivationCode {
 
 export type AuditEventType =
   | "code_generated"
+  | "code_extended"
   | "code_validation_attempt"
   | "code_validation_success"
   | "activation_attempt"
@@ -79,6 +90,8 @@ export type AuditEventType =
   | "code_expired"
   | "code_locked"
   | "code_revoked"
+  | "email_sent"
+  | "email_resent"
   | "rate_limit_exceeded";
 
 export interface ActivationAuditLog {

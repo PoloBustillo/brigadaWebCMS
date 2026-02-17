@@ -6,12 +6,14 @@ interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  hasHydrated: boolean;
 
   // Actions
   setUser: (user: AuthUser | null) => void;
   login: (user: AuthUser) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -20,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      hasHydrated: false,
 
       setUser: (user) =>
         set({
@@ -42,6 +45,7 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
     }),
     {
       name: "auth-storage",
@@ -50,6 +54,9 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );

@@ -9,9 +9,12 @@ import {
   FileText,
   ClipboardList,
   BarChart3,
-  Activity,
   ChevronLeft,
   ChevronRight,
+  UserCheck,
+  KeyRound,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-role";
@@ -51,16 +54,27 @@ const navSections: NavSection[] = [
         allowedRoles: ["admin", "encargado"],
       },
       {
+        href: "/dashboard/assignments",
+        label: "Asignaciones",
+        icon: ClipboardList,
+        allowedRoles: ["admin", "encargado"],
+      },
+    ],
+  },
+  {
+    title: "Usuarios",
+    items: [
+      {
         href: "/dashboard/users",
         label: "Usuarios",
         icon: Users,
         allowedRoles: ["admin"], // Admin only
       },
       {
-        href: "/dashboard/assignments",
-        label: "Asignaciones",
-        icon: ClipboardList,
-        allowedRoles: ["admin", "encargado"],
+        href: "/dashboard/whitelist",
+        label: "Invitaciones",
+        icon: UserCheck,
+        allowedRoles: ["admin"], // Admin only
       },
     ],
   },
@@ -73,11 +87,22 @@ const navSections: NavSection[] = [
         icon: BarChart3,
         allowedRoles: ["admin", "encargado"],
       },
+    ],
+  },
+  {
+    title: "Utilidades",
+    items: [
       {
-        href: "/dashboard/system-health",
-        label: "Estado del Sistema",
-        icon: Activity,
+        href: "/dashboard/settings",
+        label: "Configuración",
+        icon: Settings,
         allowedRoles: ["admin"], // Admin only
+      },
+      {
+        href: "/dashboard/help",
+        label: "Ayuda",
+        icon: HelpCircle,
+        allowedRoles: ["admin", "encargado", "brigadista"],
       },
     ],
   },
@@ -139,13 +164,13 @@ export function Sidebar({
             {/* Desktop collapse button */}
             <button
               onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
-              className="hidden lg:block p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="hidden lg:flex items-center justify-center p-2 hover:bg-gradient-to-r hover:from-primary-50 hover:to-blue-50 dark:hover:from-primary-900/30 dark:hover:to-blue-900/30 rounded-lg transition-all duration-200 hover:shadow-sm"
               title={isDesktopCollapsed ? "Expandir" : "Contraer"}
             >
               {isDesktopCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <ChevronRight className="w-5 h-5 text-primary-600 dark:text-primary-400 transition-transform duration-200" />
               ) : (
-                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <ChevronLeft className="w-5 h-5 text-primary-600 dark:text-primary-400 transition-transform duration-200" />
               )}
             </button>
           </div>

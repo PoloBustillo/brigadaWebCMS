@@ -1,0 +1,406 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRequireAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/store/auth-store";
+import { AdminGuard } from "@/components/auth/admin-guard";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, CheckCircle2, Lock, Mail, User, Save } from "lucide-react";
+import { userService } from "@/lib/api/user.service";
+
+interface SettingsForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  theme: "light" | "dark" | "system";
+  emailNotifications: boolean;
+}
+
+interface PasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export default function SettingsPage() {
+  const { isChecking } = useRequireAuth();
+  const currentUser = useAuthStore((state) => state.user);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "system">(
+    "profile"
+  );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<SettingsForm>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    theme: "system",
+    emailNotifications: true,
+  });
+
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  useEffect(() => {
+    // Simular carga de datos del usuario
+    setTimeout(() => {
+      if (currentUser) {
+        const [firstName, ...lastNameParts] = (currentUser.name || "").split(" ");
+        setFormData((prev) => ({
+          ...prev,
+          firstName: firstName || "",
+          lastName: lastNameParts.join(" ") || "",
+          email: currentUser.email || "",
+        }));
+      }
+      setIsLoading(false);
+    }, 500);
+  }, [currentUser]);
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      setErrorMessage(null);
+      // TODO: Implement actual API call
+      // await userService.updateProfile(formData);
+      setTimeout(() => {
+        setSuccessMessage("Perfil actualizado exitosamente");
+        setIsSaving(false);
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }, 500);
+    } catch {
+      setErrorMessage("Error al actualizar el perfil");
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setErrorMessage("Las contraseñas no coinciden");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setErrorMessage(null);
+      // TODO: Implement actual API call
+      // await userService.changePassword(passwordForm);
+      setTimeout(() => {
+        setSuccessMessage("Contraseña actualizada exitosamente");
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setIsSaving(false);
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }, 500);
+    } catch {
+      setErrorMessage("Error al cambiar la contraseña");
+      setIsSaving(false);
+    }
+  };
+
+  if (isChecking || isLoading) {
+    return <Skeleton className="w-full h-screen" />;
+  }
+
+  return (
+    <AdminGuard>
+      <div className="p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Configuración
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Administra tu perfil, contraseña y preferencias del sistema
+          </p>
+        </div>
+
+        {/* Alerts */}
+        {successMessage && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800">
+            <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <p className="text-green-800 dark:text-green-200">{successMessage}</p>
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <p className="text-red-800 dark:text-red-200">{errorMessage}</p>
+          </div>
+        )}
+
+        {/* Tabs Navigation */}
+        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+          <div className="flex gap-6">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
+                activeTab === "profile"
+                  ? "border-primary-600 text-primary-600 dark:text-primary-400"
+                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Perfil
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("password")}
+              className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
+                activeTab === "password"
+                  ? "border-primary-600 text-primary-600 dark:text-primary-400"
+                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Contraseña
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("system")}
+              className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
+                activeTab === "system"
+                  ? "border-primary-600 text-primary-600 dark:text-primary-400"
+                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Preferencias
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Profile Tab */}
+        {activeTab === "profile" && (
+          <Card className="p-6 max-w-2xl">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nombre
+                </label>
+                <Input
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleFormChange}
+                  placeholder="Tu nombre"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Apellido
+                </label>
+                <Input
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  placeholder="Tu apellido"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleFormChange}
+                  placeholder="correo@example.com"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Rol
+                </label>
+                <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-900 dark:text-gray-100">
+                  {currentUser?.rol === "admin" && "Administrador"}
+                  {currentUser?.rol === "encargado" && "Encargado"}
+                  {currentUser?.rol === "brigadista" && "Brigadista"}
+                </div>
+              </div>
+
+              <Button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? "Guardando..." : "Guardar cambios"}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Password Tab */}
+        {activeTab === "password" && (
+          <Card className="p-6 max-w-2xl">
+            <div className="space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Utiliza una contraseña fuerte con al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Contraseña actual
+                </label>
+                <Input
+                  type="password"
+                  name="currentPassword"
+                  value={passwordForm.currentPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Ingresa tu contraseña actual"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nueva contraseña
+                </label>
+                <Input
+                  type="password"
+                  name="newPassword"
+                  value={passwordForm.newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Ingresa una nueva contraseña"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Confirmar contraseña
+                </label>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordForm.confirmPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Confirma tu nueva contraseña"
+                  disabled={isSaving}
+                />
+              </div>
+
+              <Button
+                onClick={handleChangePassword}
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                {isSaving ? "Cambiando..." : "Cambiar contraseña"}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* System Preferences Tab */}
+        {activeTab === "system" && (
+          <Card className="p-6 max-w-2xl">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tema
+                </label>
+                <Select
+                  value={formData.theme}
+                  onChange={(e) => handleSelectChange("theme", e.target.value)}
+                  disabled={isSaving}
+                >
+                  <option value="system">Sistema</option>
+                  <option value="light">Claro</option>
+                  <option value="dark">Oscuro</option>
+                </Select>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+                  Notificaciones por correo
+                </h3>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.emailNotifications}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        emailNotifications: e.target.checked,
+                      }))
+                    }
+                    disabled={isSaving}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    Recibir notificaciones por correo
+                  </span>
+                </label>
+              </div>
+
+              <Button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? "Guardando..." : "Guardar preferencias"}
+              </Button>
+            </div>
+          </Card>
+        )}
+      </div>
+    </AdminGuard>
+  );
+}

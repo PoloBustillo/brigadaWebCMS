@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { useWhitelistStore } from "@/store/whitelist-store";
 import { useActivationCodeStore } from "@/store/activation-code-store";
-import { IdentifierType, UserRole } from "@/types/activation";
+import { UserRole, CreateWhitelistRequest } from "@/types/activation";
+import { userService } from "@/lib/api/user.service";
+import { User } from "@/types";
 import { Loader2 } from "lucide-react";
 
 interface CreateCodeModalProps {
@@ -17,22 +20,24 @@ interface CreateCodeModalProps {
 interface FormData {
   nombre: string;
   apellido: string;
-  identifier: string;
-  identifier_type: IdentifierType;
+  email: string; // Obligatorio para enviar código
+  phone?: string; // Opcional
   assigned_role: UserRole;
   supervisor_id?: number;
   expires_in_hours: number;
   notes?: string;
+  custom_message?: string;
 }
 
 const initialFormData: FormData = {
   nombre: "",
   apellido: "",
-  identifier: "",
-  identifier_type: "email",
+  email: "",
+  phone: "",
   assigned_role: "brigadista",
   expires_in_hours: 72,
   notes: "",
+  custom_message: "",
 };
 
 export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
@@ -40,17 +45,61 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
     {},
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [supervisors, setSupervisors] = useState<User[]>([]);
+  const [loadingSupervisors, setLoadingSupervisors] = useState(false);
 
-  const { generateCode, isGenerating } = useActivationCodeStore();
+  const { createEntry } = useWhitelistStore();
+  const { generateCode } = useActivationCodeStore();
+
+  // Load supervisors when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadSupervisors();
+    }
+  }, [isOpen]);
+
+  const loadSupervisors = async () => {
+    setLoadingSupervisors(true);
+    try {
+      const response = await userService.getUsers({
+        activo: true,
+      });
+      // Filter only admin and encargado
+      const supervisorList = response.filter(
+        (user) => user.rol === "admin" || user.rol === "encargado",
+      );
+      setSupervisors(supervisorList);
+    } catch (error) {
+      console.error("Error loading supervisors:", error);
+    } finally {
+      setLoadingSupervisors(false);
+    }
+  };
 
   const handleChange = (
     field: keyof FormData,
     value: string | number | undefined,
   ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      // Clear supervisor_id if role is changed to non-brigadista
+      if (field === "assigned_role" && value !== "brigadista") {
+        updated.supervisor_id = undefined;
+      }
+
+      return updated;
+    });
+
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+    // Clear server error when user types
+    if (serverError) {
+      setServerError(null);
     }
   };
 
@@ -58,32 +107,34 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
     if (!formData.nombre.trim()) {
-      newErrors.nombre = "First name is required";
+      newErrors.nombre = "El nombre es requerido";
     }
     if (!formData.apellido.trim()) {
-      newErrors.apellido = "Last name is required";
+      newErrors.apellido = "El apellido es requerido";
     }
-    if (!formData.identifier.trim()) {
-      newErrors.identifier = "Identifier is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "El email es requerido";
     } else {
-      // Basic validation
-      if (formData.identifier_type === "email") {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.identifier)) {
-          newErrors.identifier = "Invalid email format";
-        }
-      } else if (formData.identifier_type === "phone") {
-        const phoneRegex = /^\+?[\d\s-()]+$/;
-        if (!phoneRegex.test(formData.identifier)) {
-          newErrors.identifier = "Invalid phone format";
-        }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = "Formato de email inválido";
       }
     }
+    if (formData.phone && formData.phone.trim()) {
+      const phoneRegex = /^\+?[\d\s-()]+$/;
+      if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = "Formato de teléfono inválido";
+      }
+    }
+    // Supervisor is required for brigadista
+    if (formData.assigned_role === "brigadista" && !formData.supervisor_id) {
+      newErrors.supervisor_id = "El supervisor es requerido para brigadistas";
+    }
     if (formData.expires_in_hours < 1) {
-      newErrors.expires_in_hours = "Must be at least 1 hour";
+      newErrors.expires_in_hours = "Debe ser al menos 1 hora";
     }
     if (formData.expires_in_hours > 720) {
-      newErrors.expires_in_hours = "Maximum 720 hours (30 days)";
+      newErrors.expires_in_hours = "Máximo 720 horas (30 días)";
     }
 
     setErrors(newErrors);
@@ -93,26 +144,73 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
   const handleSubmit = async () => {
     if (!validate()) return;
 
+    setIsSubmitting(true);
+    setServerError(null);
+
     try {
-      await generateCode({
-        ...formData,
-        supervisor_id: formData.supervisor_id || undefined,
+      // Step 1: Create whitelist entry
+      const whitelistRequest: CreateWhitelistRequest = {
+        identifier: formData.email.trim(),
+        identifier_type: "email", // Siempre email para enviar código
+        full_name: `${formData.nombre.trim()} ${formData.apellido.trim()}`,
+        assigned_role: formData.assigned_role,
+        assigned_supervisor_id: formData.supervisor_id,
+        phone: formData.phone?.trim() || undefined,
         notes: formData.notes?.trim() || undefined,
+      };
+
+      const whitelistEntry = await createEntry(whitelistRequest);
+
+      // Step 2: Generate activation code for the whitelist entry
+      await generateCode({
+        whitelist_id: whitelistEntry.id,
+        expires_in_hours: formData.expires_in_hours,
+        send_email: true,
+        email_template: "default",
+        custom_message: formData.custom_message?.trim() || undefined,
       });
 
       // Reset form and close
       setFormData(initialFormData);
       setErrors({});
+      setServerError(null);
+      setIsSubmitting(false);
       onClose();
-    } catch (error) {
-      // Error handled in store
+    } catch (error: any) {
+      // Show error in UI with custom messages
+      let errorMessage = "Error al crear usuario. Por favor intenta de nuevo.";
+
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+        // Customize common error messages to Spanish
+        if (errorMessage === "Could not validate credentials") {
+          errorMessage = "Sesión expirada. Por favor vuelve a iniciar sesión.";
+        } else if (
+          errorMessage === "Supervisor is required for brigadista role."
+        ) {
+          errorMessage = "El supervisor es requerido para el rol brigadista.";
+        } else if (errorMessage.includes("Supervisor with ID")) {
+          errorMessage =
+            "El supervisor seleccionado no existe o no tiene permisos.";
+        } else if (errorMessage.includes("already exists")) {
+          errorMessage = "Este email ya está registrado en el sistema.";
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setServerError(errorMessage);
+      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    if (!isGenerating) {
+    if (!isSubmitting) {
       setFormData(initialFormData);
       setErrors({});
+      setServerError(null);
       onClose();
     }
   };
@@ -121,38 +219,83 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Generate Activation Code"
+      title="Crear Usuario y Generar Código"
       size="lg"
       footer={
         <>
-          <Button variant="ghost" onClick={handleClose} disabled={isGenerating}>
-            Cancel
+          <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isGenerating}>
-            {isGenerating ? (
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
+                Creando...
               </>
             ) : (
-              "Generate Code"
+              "Crear y Generar Código"
             )}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
+        {/* Server Error Alert */}
+        {serverError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-5 h-5 text-red-600 dark:text-red-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  Error
+                </h3>
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                  {serverError}
+                </p>
+              </div>
+              <button
+                onClick={() => setServerError(null)}
+                className="flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-200"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Name Fields */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">
-              First Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+              Nombre <span className="text-red-500">*</span>
             </label>
             <Input
               value={formData.nombre}
               onChange={(e) => handleChange("nombre", e.target.value)}
-              placeholder="John"
-              disabled={isGenerating}
+              placeholder="Juan"
+              disabled={isSubmitting}
             />
             {errors.nombre && (
               <p className="text-sm text-red-600 dark:text-red-400 mt-1">
@@ -162,14 +305,14 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Last Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+              Apellido <span className="text-red-500">*</span>
             </label>
             <Input
               value={formData.apellido}
               onChange={(e) => handleChange("apellido", e.target.value)}
-              placeholder="Doe"
-              disabled={isGenerating}
+              placeholder="Pérez"
+              disabled={isSubmitting}
             />
             {errors.apellido && (
               <p className="text-sm text-red-600 dark:text-red-400 mt-1">
@@ -179,59 +322,58 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
           </div>
         </div>
 
-        {/* Identifier Type */}
+        {/* Email */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Identifier Type <span className="text-red-500">*</span>
-          </label>
-          <Select
-            value={formData.identifier_type}
-            onChange={(e) =>
-              handleChange("identifier_type", e.target.value as IdentifierType)
-            }
-            disabled={isGenerating}
-          >
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-            <option value="national_id">National ID</option>
-          </Select>
-        </div>
-
-        {/* Identifier */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Identifier <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+            Email <span className="text-red-500">*</span>
           </label>
           <Input
-            value={formData.identifier}
-            onChange={(e) => handleChange("identifier", e.target.value)}
-            placeholder={
-              formData.identifier_type === "email"
-                ? "user@example.com"
-                : formData.identifier_type === "phone"
-                  ? "+1234567890"
-                  : "ID-12345"
-            }
-            disabled={isGenerating}
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+            placeholder="usuario@ejemplo.com"
+            disabled={isSubmitting}
           />
-          {errors.identifier && (
+          {errors.email && (
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              {errors.identifier}
+              {errors.email}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">
+            El código de activación se enviará a este email
+          </p>
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+            Teléfono (Opcional)
+          </label>
+          <Input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleChange("phone", e.target.value)}
+            placeholder="+52 123 456 7890"
+            disabled={isSubmitting}
+          />
+          {errors.phone && (
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+              {errors.phone}
             </p>
           )}
         </div>
 
         {/* Role */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Assigned Role <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+            Rol Asignado <span className="text-red-500">*</span>
           </label>
           <Select
             value={formData.assigned_role}
             onChange={(e) =>
               handleChange("assigned_role", e.target.value as UserRole)
             }
-            disabled={isGenerating}
+            disabled={isSubmitting}
           >
             <option value="brigadista">Brigadista</option>
             <option value="encargado">Encargado</option>
@@ -239,10 +381,49 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
           </Select>
         </div>
 
+        {/* Supervisor (Only for Brigadista) */}
+        {formData.assigned_role === "brigadista" && (
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+              Supervisor <span className="text-red-500">*</span>
+            </label>
+            <Select
+              value={formData.supervisor_id?.toString() || ""}
+              onChange={(e) =>
+                handleChange(
+                  "supervisor_id",
+                  e.target.value ? parseInt(e.target.value) : undefined,
+                )
+              }
+              disabled={isSubmitting || loadingSupervisors}
+            >
+              <option value="">
+                {loadingSupervisors
+                  ? "Cargando supervisores..."
+                  : "Selecciona un supervisor"}
+              </option>
+              {supervisors.map((supervisor) => (
+                <option key={supervisor.id} value={supervisor.id}>
+                  {supervisor.nombre} {supervisor.apellido} -{" "}
+                  {supervisor.rol === "admin" ? "Admin" : "Encargado"}
+                </option>
+              ))}
+            </Select>
+            {errors.supervisor_id && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                {errors.supervisor_id}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Los brigadistas requieren un supervisor (Admin o Encargado)
+            </p>
+          </div>
+        )}
+
         {/* Expiration */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Expires In (Hours) <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+            Expira en (Horas) <span className="text-red-500">*</span>
           </label>
           <Input
             type="number"
@@ -252,7 +433,7 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
             }
             min={1}
             max={720}
-            disabled={isGenerating}
+            disabled={isSubmitting}
           />
           {errors.expires_in_hours && (
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
@@ -260,22 +441,22 @@ export function CreateCodeModal({ isOpen, onClose }: CreateCodeModalProps) {
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-1">
-            Default: 72 hours (3 days). Maximum: 720 hours (30 days)
+            Por defecto: 72 horas (3 días). Máximo: 720 horas (30 días)
           </p>
         </div>
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Notes (Optional)
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+            Notas (Opcional)
           </label>
           <textarea
             value={formData.notes}
             onChange={(e) => handleChange("notes", e.target.value)}
-            placeholder="Internal notes about this activation..."
+            placeholder="Notas internas sobre esta activación..."
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
-            disabled={isGenerating}
+            disabled={isSubmitting}
           />
         </div>
       </div>

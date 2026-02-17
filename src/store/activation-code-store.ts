@@ -248,8 +248,14 @@ export const useActivationCodeStore = create<ActivationCodeState>(
     resendEmail: async (id: number, message?: string) => {
       set({ isLoading: true, error: null });
       try {
-        await activationCodeService.resendEmail(id, message);
-        set({ isLoading: false });
+        const response = await activationCodeService.resendEmail(id, message);
+        set({
+          isLoading: false,
+          generatedCode: response.code || null,
+          showGeneratedCode: !!response.code,
+        });
+
+        await get().fetchCodes();
       } catch (error: any) {
         set({
           error: error.response?.data?.message || "Failed to resend email",

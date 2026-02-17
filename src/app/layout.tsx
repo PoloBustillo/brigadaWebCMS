@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Instrument_Sans, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ThemeScript } from "@/lib/theme-script";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const fontBody = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
+
+const fontDisplay = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: "Brigada CMS - Admin Panel",
@@ -21,7 +29,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={inter.className}>
+      <body className={`${fontBody.variable} ${fontDisplay.variable} antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
