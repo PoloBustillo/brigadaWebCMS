@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { Survey, SurveyVersion } from "@/types";
-import { X, FileText, Calendar, User, BadgeCheck, CalendarRange, Clock, Users, UserCheck } from "lucide-react";
+import {
+  X,
+  FileText,
+  Calendar,
+  User,
+  BadgeCheck,
+  CalendarRange,
+  Clock,
+  Users,
+  UserCheck,
+} from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import SurveyVersions from "./survey-versions";
@@ -179,7 +189,9 @@ export default function SurveyDetailsModal({
                   <div>
                     <p className="text-sm text-gray-500">Máx. respuestas</p>
                     <p className="font-semibold text-gray-900">
-                      {survey.max_responses ? survey.max_responses.toLocaleString() : "Sin límite"}
+                      {survey.max_responses
+                        ? survey.max_responses.toLocaleString()
+                        : "Sin límite"}
                     </p>
                   </div>
                 </div>
@@ -188,12 +200,18 @@ export default function SurveyDetailsModal({
               {/* Anónimo */}
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${survey.allow_anonymous ? "bg-yellow-100" : "bg-gray-100"}`}>
-                    <UserCheck className={`h-5 w-5 ${survey.allow_anonymous ? "text-yellow-600" : "text-gray-400"}`} />
+                  <div
+                    className={`p-2 rounded-lg ${survey.allow_anonymous ? "bg-yellow-100" : "bg-gray-100"}`}
+                  >
+                    <UserCheck
+                      className={`h-5 w-5 ${survey.allow_anonymous ? "text-yellow-600" : "text-gray-400"}`}
+                    />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Respuestas anónimas</p>
-                    <p className={`font-semibold ${survey.allow_anonymous ? "text-yellow-700" : "text-gray-500"}`}>
+                    <p
+                      className={`font-semibold ${survey.allow_anonymous ? "text-yellow-700" : "text-gray-500"}`}
+                    >
                       {survey.allow_anonymous ? "Permitidas" : "No permitidas"}
                     </p>
                   </div>

@@ -295,7 +295,8 @@ export default function SurveysPage() {
                 description: editingSurvey.description,
                 starts_at: editingSurvey.starts_at,
                 ends_at: editingSurvey.ends_at,
-                estimated_duration_minutes: editingSurvey.estimated_duration_minutes,
+                estimated_duration_minutes:
+                  editingSurvey.estimated_duration_minutes,
                 max_responses: editingSurvey.max_responses,
                 allow_anonymous: editingSurvey.allow_anonymous,
                 questions: editingSurvey.versions?.[0]?.questions || [],

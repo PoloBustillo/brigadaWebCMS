@@ -17,7 +17,7 @@ export const notificationService = {
   }): Promise<NotificationListResponse> {
     const response = await apiClient.get<NotificationListResponse>(
       "/admin/notifications",
-      { params }
+      { params },
     );
     return response.data;
   },
@@ -28,21 +28,21 @@ export const notificationService = {
    */
   async getUnreadCount(): Promise<number> {
     const response = await apiClient.get<UnreadCountResponse>(
-      "/admin/notifications/unread-count"
+      "/admin/notifications/unread-count",
     );
     return response.data.count;
   },
 
   async markRead(id: number): Promise<Notification> {
     const response = await apiClient.patch<Notification>(
-      `/admin/notifications/${id}/read`
+      `/admin/notifications/${id}/read`,
     );
     return response.data;
   },
 
   async markAllRead(): Promise<{ updated: number }> {
     const response = await apiClient.patch<{ updated: number }>(
-      "/admin/notifications/read-all"
+      "/admin/notifications/read-all",
     );
     return response.data;
   },

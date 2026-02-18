@@ -84,7 +84,9 @@ export default function SurveyList({
               )[0];
               const totalVersions = survey.versions?.length || 0;
               const hasDraft =
-                latestVersion && !latestVersion.is_published && totalVersions > 1;
+                latestVersion &&
+                !latestVersion.is_published &&
+                totalVersions > 1;
 
               return (
                 <tr
@@ -118,8 +120,8 @@ export default function SurveyList({
                     <div className="mt-1 flex flex-col gap-1">
                       {publishedVersion && (
                         <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
-                          <BadgeCheck className="h-3 w-3" />
-                          v{publishedVersion.version_number} publicada
+                          <BadgeCheck className="h-3 w-3" />v
+                          {publishedVersion.version_number} publicada
                         </span>
                       )}
                       {hasDraft && (
@@ -169,23 +171,37 @@ export default function SurveyList({
                           {survey.starts_at && (
                             <div className="whitespace-nowrap">
                               Inicio:{" "}
-                              {format(new Date(survey.starts_at), "dd MMM yyyy", { locale: es })}
+                              {format(
+                                new Date(survey.starts_at),
+                                "dd MMM yyyy",
+                                { locale: es },
+                              )}
                             </div>
                           )}
                           {survey.ends_at && (
                             <div className="whitespace-nowrap">
                               Cierre:{" "}
                               <span
-                                className={new Date(survey.ends_at) < new Date() ? "text-red-500 font-medium" : ""}
+                                className={
+                                  new Date(survey.ends_at) < new Date()
+                                    ? "text-red-500 font-medium"
+                                    : ""
+                                }
                               >
-                                {format(new Date(survey.ends_at), "dd MMM yyyy", { locale: es })}
+                                {format(
+                                  new Date(survey.ends_at),
+                                  "dd MMM yyyy",
+                                  { locale: es },
+                                )}
                               </span>
                             </div>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <span className="text-gray-400 italic text-xs">Sin límite</span>
+                      <span className="text-gray-400 italic text-xs">
+                        Sin límite
+                      </span>
                     )}
                   </td>
 

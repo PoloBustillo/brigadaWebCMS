@@ -135,16 +135,26 @@ export default function CreateSurveyModal({
   const [allowAnonymous, setAllowAnonymous] = useState(false);
   const [questions, setQuestions] = useState<
     Omit<Question, "id" | "version_id">[]
-  >([]); 
+  >([]);
 
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
       setDescription(initialData.description || "");
-      setStartsAt(initialData.starts_at ? initialData.starts_at.slice(0, 10) : "");
+      setStartsAt(
+        initialData.starts_at ? initialData.starts_at.slice(0, 10) : "",
+      );
       setEndsAt(initialData.ends_at ? initialData.ends_at.slice(0, 10) : "");
-      setDurationMinutes(initialData.estimated_duration_minutes != null ? String(initialData.estimated_duration_minutes) : "");
-      setMaxResponses(initialData.max_responses != null ? String(initialData.max_responses) : "");
+      setDurationMinutes(
+        initialData.estimated_duration_minutes != null
+          ? String(initialData.estimated_duration_minutes)
+          : "",
+      );
+      setMaxResponses(
+        initialData.max_responses != null
+          ? String(initialData.max_responses)
+          : "",
+      );
       setAllowAnonymous(initialData.allow_anonymous ?? false);
       setQuestions(
         initialData.questions?.map((q) => ({
@@ -249,7 +259,9 @@ export default function CreateSurveyModal({
       description,
       starts_at: startsAt || null,
       ends_at: endsAt || null,
-      estimated_duration_minutes: durationMinutes ? parseInt(durationMinutes) : null,
+      estimated_duration_minutes: durationMinutes
+        ? parseInt(durationMinutes)
+        : null,
       max_responses: maxResponses ? parseInt(maxResponses) : null,
       allow_anonymous: allowAnonymous,
       questions,
@@ -365,7 +377,9 @@ export default function CreateSurveyModal({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Máximo de respuestas
-                  <span className="ml-1 text-xs text-gray-400">(vacío = sin límite)</span>
+                  <span className="ml-1 text-xs text-gray-400">
+                    (vacío = sin límite)
+                  </span>
                 </label>
                 <input
                   type="number"
@@ -397,8 +411,12 @@ export default function CreateSurveyModal({
                 />
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-700">Permitir respuestas anónimas</span>
-                <p className="text-xs text-gray-400">La encuesta podrá responderse sin asignación de brigadista</p>
+                <span className="text-sm font-medium text-gray-700">
+                  Permitir respuestas anónimas
+                </span>
+                <p className="text-xs text-gray-400">
+                  La encuesta podrá responderse sin asignación de brigadista
+                </p>
               </div>
             </label>
           </div>

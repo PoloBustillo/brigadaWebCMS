@@ -51,7 +51,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     // Optimistic update
     set((state) => ({
       notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
+        n.id === id ? { ...n, read: true } : n,
       ),
       unreadCount: Math.max(0, state.unreadCount - 1),
     }));
@@ -82,9 +82,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     // Optimistic update
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
-      unreadCount: deleted && !deleted.read
-        ? Math.max(0, state.unreadCount - 1)
-        : state.unreadCount,
+      unreadCount:
+        deleted && !deleted.read
+          ? Math.max(0, state.unreadCount - 1)
+          : state.unreadCount,
     }));
     try {
       await notificationService.deleteOne(id);
