@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Survey, SurveyVersion } from "@/types";
-import { X, FileText, Calendar, User } from "lucide-react";
+import { X, FileText, Calendar, User, BadgeCheck, CalendarRange, Clock, Users, UserCheck } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import SurveyVersions from "./survey-versions";
@@ -55,7 +55,8 @@ export default function SurveyDetailsModal({
 
           {/* Info Cards */}
           <div className="p-6 border-b bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Estado */}
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -70,22 +71,72 @@ export default function SurveyDetailsModal({
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 border border-gray-200">
+              {/* Publicación */}
+              <div
+                className={`bg-white rounded-lg p-4 border ${publishedVersion ? "border-green-200" : "border-gray-200"}`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-green-600" />
+                  <div
+                    className={`p-2 rounded-lg ${publishedVersion ? "bg-green-100" : "bg-gray-100"}`}
+                  >
+                    <BadgeCheck
+                      className={`h-5 w-5 ${publishedVersion ? "text-green-600" : "text-gray-400"}`}
+                    />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Versión Publicada</p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm text-gray-500">Publicación</p>
+                    <p
+                      className={`font-semibold ${publishedVersion ? "text-green-700" : "text-gray-500"}`}
+                    >
                       {publishedVersion
-                        ? `v${publishedVersion.version_number}`
-                        : "Ninguna"}
+                        ? `v${publishedVersion.version_number} publicada`
+                        : "Sin publicar"}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Vigencia */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <CalendarRange className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-gray-500">Vigencia</p>
+                    {survey.starts_at || survey.ends_at ? (
+                      <div className="text-sm font-medium text-gray-900">
+                        {survey.starts_at && (
+                          <div>
+                            Inicio:{" "}
+                            {format(new Date(survey.starts_at), "dd MMM yyyy", {
+                              locale: es,
+                            })}
+                          </div>
+                        )}
+                        {survey.ends_at && (
+                          <div
+                            className={
+                              new Date(survey.ends_at) < new Date()
+                                ? "text-red-600"
+                                : ""
+                            }
+                          >
+                            Cierre:{" "}
+                            {format(new Date(survey.ends_at), "dd MMM yyyy", {
+                              locale: es,
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="font-semibold text-gray-400">Sin límite</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Creada */}
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
@@ -97,6 +148,53 @@ export default function SurveyDetailsModal({
                       {format(new Date(survey.created_at), "dd MMM yyyy", {
                         locale: es,
                       })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Duración estimada */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-teal-100 rounded-lg">
+                    <Clock className="h-5 w-5 text-teal-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Duración estimada</p>
+                    <p className="font-semibold text-gray-900">
+                      {survey.estimated_duration_minutes
+                        ? `${survey.estimated_duration_minutes} min`
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Máx. respuestas */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Users className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Máx. respuestas</p>
+                    <p className="font-semibold text-gray-900">
+                      {survey.max_responses ? survey.max_responses.toLocaleString() : "Sin límite"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Anónimo */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${survey.allow_anonymous ? "bg-yellow-100" : "bg-gray-100"}`}>
+                    <UserCheck className={`h-5 w-5 ${survey.allow_anonymous ? "text-yellow-600" : "text-gray-400"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Respuestas anónimas</p>
+                    <p className={`font-semibold ${survey.allow_anonymous ? "text-yellow-700" : "text-gray-500"}`}>
+                      {survey.allow_anonymous ? "Permitidas" : "No permitidas"}
                     </p>
                   </div>
                 </div>

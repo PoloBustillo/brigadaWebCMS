@@ -44,6 +44,11 @@ export default function SurveysPage() {
   const handleCreateSurvey = async (data: {
     title: string;
     description?: string;
+    starts_at?: string | null;
+    ends_at?: string | null;
+    estimated_duration_minutes?: number | null;
+    max_responses?: number | null;
+    allow_anonymous?: boolean;
     questions: Omit<Question, "id" | "version_id">[];
   }) => {
     try {
@@ -62,6 +67,11 @@ export default function SurveysPage() {
   const handleEditSurvey = async (data: {
     title: string;
     description?: string;
+    starts_at?: string | null;
+    ends_at?: string | null;
+    estimated_duration_minutes?: number | null;
+    max_responses?: number | null;
+    allow_anonymous?: boolean;
     questions: Omit<Question, "id" | "version_id">[];
   }) => {
     if (!editingSurvey) return;
@@ -104,8 +114,7 @@ export default function SurveysPage() {
   const handleToggleStatus = async (survey: Survey) => {
     try {
       await surveyService.updateSurvey(survey.id, {
-        title: survey.title,
-        description: survey.description,
+        is_active: !survey.is_active,
       });
       await loadSurveys();
     } catch (error) {
@@ -284,6 +293,11 @@ export default function SurveysPage() {
             ? {
                 title: editingSurvey.title,
                 description: editingSurvey.description,
+                starts_at: editingSurvey.starts_at,
+                ends_at: editingSurvey.ends_at,
+                estimated_duration_minutes: editingSurvey.estimated_duration_minutes,
+                max_responses: editingSurvey.max_responses,
+                allow_anonymous: editingSurvey.allow_anonymous,
                 questions: editingSurvey.versions?.[0]?.questions || [],
               }
             : undefined

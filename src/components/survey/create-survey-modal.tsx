@@ -34,11 +34,21 @@ interface CreateSurveyModalProps {
   onSubmit: (data: {
     title: string;
     description?: string;
+    starts_at?: string | null;
+    ends_at?: string | null;
+    estimated_duration_minutes?: number | null;
+    max_responses?: number | null;
+    allow_anonymous?: boolean;
     questions: Omit<Question, "id" | "version_id">[];
   }) => void;
   initialData?: {
     title: string;
     description?: string;
+    starts_at?: string | null;
+    ends_at?: string | null;
+    estimated_duration_minutes?: number | null;
+    max_responses?: number | null;
+    allow_anonymous?: boolean;
     questions?: Question[];
   };
   isLoading?: boolean;
@@ -118,14 +128,24 @@ export default function CreateSurveyModal({
 }: CreateSurveyModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState<string>("");
+  const [maxResponses, setMaxResponses] = useState<string>("");
+  const [allowAnonymous, setAllowAnonymous] = useState(false);
   const [questions, setQuestions] = useState<
     Omit<Question, "id" | "version_id">[]
-  >([]);
+  >([]); 
 
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
       setDescription(initialData.description || "");
+      setStartsAt(initialData.starts_at ? initialData.starts_at.slice(0, 10) : "");
+      setEndsAt(initialData.ends_at ? initialData.ends_at.slice(0, 10) : "");
+      setDurationMinutes(initialData.estimated_duration_minutes != null ? String(initialData.estimated_duration_minutes) : "");
+      setMaxResponses(initialData.max_responses != null ? String(initialData.max_responses) : "");
+      setAllowAnonymous(initialData.allow_anonymous ?? false);
       setQuestions(
         initialData.questions?.map((q) => ({
           question_text: q.question_text,
@@ -139,6 +159,11 @@ export default function CreateSurveyModal({
     } else {
       setTitle("");
       setDescription("");
+      setStartsAt("");
+      setEndsAt("");
+      setDurationMinutes("");
+      setMaxResponses("");
+      setAllowAnonymous(false);
       setQuestions([]);
     }
   }, [initialData, isOpen]);
@@ -219,7 +244,16 @@ export default function CreateSurveyModal({
       alert("Debes agregar un título y al menos una pregunta");
       return;
     }
-    onSubmit({ title, description, questions });
+    onSubmit({
+      title,
+      description,
+      starts_at: startsAt || null,
+      ends_at: endsAt || null,
+      estimated_duration_minutes: durationMinutes ? parseInt(durationMinutes) : null,
+      max_responses: maxResponses ? parseInt(maxResponses) : null,
+      allow_anonymous: allowAnonymous,
+      questions,
+    });
   };
 
   if (!isOpen) return null;
@@ -273,6 +307,100 @@ export default function CreateSurveyModal({
                 disabled={isLoading}
               />
             </div>
+
+            {/* Vigencia */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de inicio
+                  <span className="ml-1 text-xs text-gray-400">(opcional)</span>
+                </label>
+                <input
+                  type="date"
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isLoading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de cierre
+                  <span className="ml-1 text-xs text-gray-400">(opcional)</span>
+                </label>
+                <input
+                  type="date"
+                  value={endsAt}
+                  min={startsAt || undefined}
+                  onChange={(e) => setEndsAt(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+            {endsAt && startsAt && endsAt < startsAt && (
+              <p className="text-xs text-red-500 -mt-2">
+                La fecha de cierre debe ser posterior a la de inicio.
+              </p>
+            )}
+
+            {/* Configuración adicional */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duración estimada
+                  <span className="ml-1 text-xs text-gray-400">(minutos)</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={480}
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(e.target.value)}
+                  placeholder="Ej: 15"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isLoading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Máximo de respuestas
+                  <span className="ml-1 text-xs text-gray-400">(vacío = sin límite)</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={maxResponses}
+                  onChange={(e) => setMaxResponses(e.target.value)}
+                  placeholder="Ej: 500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Allow anonymous */}
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={allowAnonymous}
+                  onChange={(e) => setAllowAnonymous(e.target.checked)}
+                  className="sr-only"
+                  disabled={isLoading}
+                />
+                <div
+                  className={`w-10 h-6 rounded-full transition-colors ${allowAnonymous ? "bg-primary-600" : "bg-gray-300"}`}
+                />
+                <div
+                  className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${allowAnonymous ? "translate-x-4" : ""}`}
+                />
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Permitir respuestas anónimas</span>
+                <p className="text-xs text-gray-400">La encuesta podrá responderse sin asignación de brigadista</p>
+              </div>
+            </label>
           </div>
 
           {/* Questions */}

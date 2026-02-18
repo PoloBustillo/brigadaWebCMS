@@ -1,6 +1,33 @@
 // User roles
 export type UserRole = "admin" | "encargado" | "brigadista";
 
+// Notification types
+export type NotificationType =
+  | "survey_created"
+  | "survey_deleted"
+  | "version_published"
+  | "assignment_created"
+  | "user_registered";
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  action_url?: string | null;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  notifications: Notification[];
+  unread_count: number;
+}
+
+export interface UnreadCountResponse {
+  count: number;
+}
+
 // User types
 export interface User {
   id: number;
@@ -27,6 +54,11 @@ export interface Survey {
   description?: string;
   is_active: boolean;
   created_by: number;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  estimated_duration_minutes?: number | null;
+  max_responses?: number | null;
+  allow_anonymous: boolean;
   created_at: string;
   updated_at?: string;
   versions?: SurveyVersion[];

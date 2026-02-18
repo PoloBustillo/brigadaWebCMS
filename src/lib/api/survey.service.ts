@@ -4,12 +4,23 @@ import { Survey, Question, AnswerOption, QuestionType } from "@/types";
 interface CreateSurveyData {
   title: string;
   description?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  estimated_duration_minutes?: number | null;
+  max_responses?: number | null;
+  allow_anonymous?: boolean;
   questions: CreateQuestionData[];
 }
 
 interface UpdateSurveyData {
   title?: string;
   description?: string;
+  is_active?: boolean;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  estimated_duration_minutes?: number | null;
+  max_responses?: number | null;
+  allow_anonymous?: boolean;
   questions?: CreateQuestionData[];
   change_summary?: string;
 }

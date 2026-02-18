@@ -10,6 +10,9 @@ import {
   FileText,
   Calendar,
   MoreVertical,
+  GitBranch,
+  BadgeCheck,
+  CalendarRange,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -47,157 +50,237 @@ export default function SurveyList({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Encuesta
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Versiones
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Estado
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Fecha de Creación
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Acciones
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {surveys.map((survey) => {
-            const publishedVersion = survey.versions?.find(
-              (v) => v.is_published,
-            );
-            const totalVersions = survey.versions?.length || 0;
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[28%]">
+                Encuesta
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                Versiones
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[17%]">
+                Estado
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[22%] whitespace-nowrap">
+                Vigencia
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] whitespace-nowrap">
+                Creada
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {surveys.map((survey) => {
+              const publishedVersion = survey.versions?.find(
+                (v) => v.is_published,
+              );
+              const latestVersion = survey.versions?.sort(
+                (a, b) => b.version_number - a.version_number,
+              )[0];
+              const totalVersions = survey.versions?.length || 0;
+              const hasDraft =
+                latestVersion && !latestVersion.is_published && totalVersions > 1;
 
-            return (
-              <tr
-                key={survey.id}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => onView(survey)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
+              return (
+                <tr
+                  key={survey.id}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => onView(survey)}
+                >
+                  {/* ENCUESTA */}
+                  <td className="px-6 py-4">
+                    <div className="max-w-xs">
+                      <div className="text-sm font-medium text-gray-900 truncate">
                         {survey.title}
                       </div>
                       {survey.description && (
-                        <div className="text-sm text-gray-500">
+                        <div className="text-xs text-gray-500 truncate mt-0.5">
                           {survey.description}
                         </div>
                       )}
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {totalVersions}{" "}
-                    {totalVersions === 1 ? "versión" : "versiones"}
-                  </div>
-                  {publishedVersion && (
-                    <div className="text-xs text-gray-500">
-                      v{publishedVersion.version_number} publicada
-                    </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      survey.is_active
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {survey.is_active ? "Activa" : "Inactiva"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {format(new Date(survey.created_at), "dd MMM yyyy", {
-                      locale: es,
-                    })}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="relative inline-block text-left">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(
-                          openMenuId === survey.id ? null : survey.id,
-                        );
-                      }}
-                      className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100"
-                    >
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
+                  </td>
 
-                    {openMenuId === survey.id && (
-                      <div
-                        className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                        onMouseLeave={() => setOpenMenuId(null)}
+                  {/* VERSIONES */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                      <GitBranch className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span>
+                        {totalVersions}{" "}
+                        {totalVersions === 1 ? "versión" : "versiones"}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-col gap-1">
+                      {publishedVersion && (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
+                          <BadgeCheck className="h-3 w-3" />
+                          v{publishedVersion.version_number} publicada
+                        </span>
+                      )}
+                      {hasDraft && (
+                        <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                          v{latestVersion!.version_number} borrador
+                        </span>
+                      )}
+                      {totalVersions === 0 && (
+                        <span className="text-xs text-gray-400">
+                          Sin versiones
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* ESTADO */}
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={`self-start px-2 py-0.5 text-xs font-semibold rounded-full ${
+                          survey.is_active
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
                       >
-                        <div className="py-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onView(survey);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver detalles
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(survey);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Editar
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleStatus(survey);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <Power className="h-4 w-4 mr-2" />
-                            {survey.is_active ? "Desactivar" : "Activar"}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDelete(survey);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </button>
+                        {survey.is_active ? "Activa" : "Inactiva"}
+                      </span>
+                      {publishedVersion ? (
+                        <span className="self-start inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                          <BadgeCheck className="h-3 w-3" />
+                          Publicada
+                        </span>
+                      ) : (
+                        <span className="self-start px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700">
+                          Sin publicar
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* VIGENCIA */}
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {survey.starts_at || survey.ends_at ? (
+                      <div className="flex items-start gap-1.5">
+                        <CalendarRange className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          {survey.starts_at && (
+                            <div className="whitespace-nowrap">
+                              Inicio:{" "}
+                              {format(new Date(survey.starts_at), "dd MMM yyyy", { locale: es })}
+                            </div>
+                          )}
+                          {survey.ends_at && (
+                            <div className="whitespace-nowrap">
+                              Cierre:{" "}
+                              <span
+                                className={new Date(survey.ends_at) < new Date() ? "text-red-500 font-medium" : ""}
+                              >
+                                {format(new Date(survey.ends_at), "dd MMM yyyy", { locale: es })}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
+                    ) : (
+                      <span className="text-gray-400 italic text-xs">Sin límite</span>
                     )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </td>
+
+                  {/* FECHA CREACIÓN */}
+                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      {format(new Date(survey.created_at), "dd MMM yy", {
+                        locale: es,
+                      })}
+                    </div>
+                  </td>
+
+                  {/* ACCIONES */}
+                  <td className="px-6 py-4 text-right text-sm font-medium">
+                    <div className="relative inline-block text-left">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(
+                            openMenuId === survey.id ? null : survey.id,
+                          );
+                        }}
+                        className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100"
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
+
+                      {openMenuId === survey.id && (
+                        <div
+                          className="origin-top-right absolute right-0 mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                          onMouseLeave={() => setOpenMenuId(null)}
+                        >
+                          <div className="py-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onView(survey);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Ver versiones
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(survey);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span>
+                                Editar
+                                <span className="block text-xs text-gray-400 leading-none mt-0.5">
+                                  (crea nueva versión)
+                                </span>
+                              </span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleStatus(survey);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Power className="h-4 w-4" />
+                              {survey.is_active ? "Desactivar" : "Activar"}
+                            </button>
+                            <div className="border-t border-gray-100 my-1" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(survey);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Eliminar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
