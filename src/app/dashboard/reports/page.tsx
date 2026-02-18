@@ -167,7 +167,13 @@ export default function ReportsPage() {
   // Summary CSV (one row per survey)
   const handleExportSummaryCSV = () => {
     if (summaries.length === 0) return;
-    const headers = ["ID", "Encuesta", "Estado", "Respuestas", "Última Respuesta"];
+    const headers = [
+      "ID",
+      "Encuesta",
+      "Estado",
+      "Respuestas",
+      "Última Respuesta",
+    ];
     const rows = summaries.map((s) => [
       s.survey_id,
       `"${s.survey_title.replace(/"/g, '""')}"`,
@@ -179,7 +185,8 @@ export default function ReportsPage() {
           })
         : "Sin respuestas",
     ]);
-    const csv = "\uFEFF" + [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const csv =
+      "\uFEFF" + [headers, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -290,9 +297,7 @@ export default function ReportsPage() {
             icon={ClipboardCheck}
             label="Encuestas con Respuestas"
             value={
-              isLoading
-                ? "--"
-                : `${surveysWithResponses} / ${summaries.length}`
+              isLoading ? "--" : `${surveysWithResponses} / ${summaries.length}`
             }
             color="text-emerald-600 dark:text-emerald-400"
             bg="bg-emerald-50 dark:bg-emerald-900/10"
@@ -357,8 +362,8 @@ export default function ReportsPage() {
               Respuestas por Encuesta
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Haz clic en <Eye className="inline w-3 h-3 mx-0.5" /> para ver
-              las respuestas detalladas y exportar CSV con todos los datos.
+              Haz clic en <Eye className="inline w-3 h-3 mx-0.5" /> para ver las
+              respuestas detalladas y exportar CSV con todos los datos.
             </p>
           </div>
 

@@ -10,6 +10,7 @@ import {
   ClipboardList,
   MapPin,
   ChevronDown,
+  FileText,
 } from "lucide-react";
 
 interface CreateAssignmentModalProps {
@@ -19,9 +20,16 @@ interface CreateAssignmentModalProps {
     user_id: number;
     survey_id: number;
     location?: string;
+    notes?: string;
   }) => Promise<void>;
   isLoading?: boolean;
 }
+
+const ROLE_LABELS: Record<string, string> = {
+  brigadista: "Brigadista",
+  encargado: "Encargado",
+  admin: "Admin",
+};
 
 export default function CreateAssignmentModal({
   isOpen,
@@ -29,13 +37,14 @@ export default function CreateAssignmentModal({
   onSubmit,
   isLoading = false,
 }: CreateAssignmentModalProps) {
-  const [brigadistas, setBrigadistas] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
   const [userId, setUserId] = useState<number | "">("");
   const [surveyId, setSurveyId] = useState<number | "">("");
   const [location, setLocation] = useState("");
+  const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -43,16 +52,19 @@ export default function CreateAssignmentModal({
     setUserId("");
     setSurveyId("");
     setLocation("");
+    setNotes("");
     setError("");
 
     const load = async () => {
       setLoadingData(true);
       try {
-        const [users, surveyList] = await Promise.all([
+        // Load ALL active non-admin users (brigadistas + encargados)
+        const [brigadistas, encargados, surveyList] = await Promise.all([
           userService.getUsers({ rol: "brigadista", activo: true }),
+          userService.getUsers({ rol: "encargado", activo: true }),
           surveyService.getSurveys({ limit: 200 }),
         ]);
-        setBrigadistas(users);
+        setUsers([...brigadistas, ...encargados]);
         setSurveys(surveyList.filter((s) => s.is_active));
       } catch {
         setError("Error al cargar datos. Intenta de nuevo.");
@@ -66,7 +78,7 @@ export default function CreateAssignmentModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId || !surveyId) {
-      setError("Selecciona un brigadista y una encuesta.");
+      setError("Selecciona un usuario y una encuesta.");
       return;
     }
     setError("");
@@ -75,6 +87,7 @@ export default function CreateAssignmentModal({
         user_id: Number(userId),
         survey_id: Number(surveyId),
         location: location.trim() || undefined,
+        notes: notes.trim() || undefined,
       });
     } catch (err: any) {
       const msg = err?.response?.data?.detail ?? "Error al crear asignación.";
@@ -111,15 +124,15 @@ export default function CreateAssignmentModal({
           {loadingData ? (
             <div className="py-8 text-center text-gray-500">
               <div className="animate-spin h-7 w-7 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-3" />
-              Cargando brigadistas y encuestas...
+              Cargando usuarios y encuestas...
             </div>
           ) : (
             <>
-              {/* Brigadista */}
+              {/* Usuario (brigadista o encargado) */}
               <div>
                 <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
                   <UserIcon className="h-4 w-4 text-gray-400" />
-                  Brigadista *
+                  Asignar a *
                 </label>
                 <div className="relative">
                   <select
@@ -131,20 +144,24 @@ export default function CreateAssignmentModal({
                     required
                     disabled={isLoading}
                   >
-                    <option value="">Seleccionar brigadista...</option>
-                    {brigadistas.map((u) => (
+                    <option value="">Seleccionar usuario...</option>
+                    {users.map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.nombre} {u.apellido} — {u.email}
+                        [{ROLE_LABELS[u.rol ?? ""] ?? u.rol}] {u.nombre}{" "}
+                        {u.apellido} — {u.email}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
                 </div>
-                {brigadistas.length === 0 && (
+                {users.length === 0 && (
                   <p className="text-xs text-amber-600 mt-1">
-                    No hay brigadistas activos disponibles.
+                    No hay usuarios activos disponibles.
                   </p>
                 )}
+                <p className="text-xs text-gray-400 mt-1">
+                  Puedes asignar a brigadistas o encargados.
+                </p>
               </div>
 
               {/* Encuesta */}
@@ -192,6 +209,23 @@ export default function CreateAssignmentModal({
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Ej: Colonia Centro, Cuadra 3"
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Instrucciones / Notas */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
+                  <FileText className="h-4 w-4 text-gray-400" />
+                  Instrucciones para el usuario
+                  <span className="text-gray-400 font-normal">(opcional)</span>
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Ej: Visitar en horario matutino. Priorizar adultos mayores."
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                   disabled={isLoading}
                 />
               </div>

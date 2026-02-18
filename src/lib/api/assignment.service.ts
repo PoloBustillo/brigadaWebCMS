@@ -5,11 +5,13 @@ export interface CreateAssignmentData {
   user_id: number;
   survey_id: number;
   location?: string;
+  notes?: string;
 }
 
 export interface UpdateAssignmentData {
-  status?: AssignmentStatus;
+  status?: "active" | "inactive";
   location?: string;
+  notes?: string;
 }
 
 export interface GetAssignmentsParams {

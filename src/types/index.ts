@@ -133,9 +133,10 @@ export interface Assignment {
   id: number;
   user_id: number;
   survey_id: number;
-  assigned_by: number;
+  assigned_by?: number;
   status: AssignmentStatus;
   location?: string;
+  notes?: string;
   created_at: string;
   updated_at?: string;
   // Populated in list view (AssignmentDetailResponse)
@@ -143,14 +144,22 @@ export interface Assignment {
     id: number;
     full_name: string;
     email: string;
+    role: string;
   };
   survey?: {
     id: number;
     title: string;
   };
+  assigned_by_user?: {
+    id: number;
+    full_name: string;
+    email: string;
+    role: string;
+  };
+  response_count?: number;
 }
 
-export type AssignmentStatus = "pending" | "in_progress" | "completed";
+export type AssignmentStatus = "active" | "inactive";
 
 // Response types
 export interface SurveyResponse {

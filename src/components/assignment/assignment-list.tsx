@@ -10,6 +10,9 @@ import {
   User,
   ClipboardList,
   MapPin,
+  FileText,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -42,6 +45,29 @@ const statusConfig: Record<
     Icon: CheckCircle,
   },
 };
+
+const ROLE_LABELS: Record<string, { label: string; className: string }> = {
+  brigadista: {
+    label: "Brigadista",
+    className: "bg-purple-100 text-purple-700",
+  },
+  encargado: { label: "Encargado", className: "bg-indigo-100 text-indigo-700" },
+  admin: { label: "Admin", className: "bg-gray-100 text-gray-600" },
+};
+
+function RoleBadge({ role }: { role?: string }) {
+  const cfg = ROLE_LABELS[role ?? ""] ?? {
+    label: role ?? "—",
+    className: "bg-gray-100 text-gray-600",
+  };
+  return (
+    <span
+      className={`text-xs px-1.5 py-0.5 rounded font-medium ${cfg.className}`}
+    >
+      {cfg.label}
+    </span>
+  );
+}
 
 function StatusBadge({ status }: { status: AssignmentStatus }) {
   const cfg = statusConfig[status] ?? statusConfig.pending;
@@ -119,6 +145,28 @@ function ActionsMenu({
   );
 }
 
+function NotesRow({ notes }: { notes: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <tr className="bg-amber-50 border-b border-amber-100">
+      <td colSpan={7} className="px-6 py-2">
+        <div
+          className="flex items-start gap-2 text-sm text-amber-800 cursor-pointer"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <FileText className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-500" />
+          <span className={expanded ? "" : "line-clamp-1"}>{notes}</span>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 ml-auto flex-shrink-0 text-amber-400" />
+          ) : (
+            <ChevronDown className="h-4 w-4 ml-auto flex-shrink-0 text-amber-400" />
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function AssignmentList({
   assignments,
   onUpdateStatus,
@@ -154,7 +202,7 @@ export default function AssignmentList({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Brigadista
+              Usuario asignado
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Encuesta
@@ -163,10 +211,13 @@ export default function AssignmentList({
               Estado
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Zona / Ubicación
+              Zona
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Asignada
+              Asignada por
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Fecha
             </th>
             <th className="relative px-6 py-3">
               <span className="sr-only">Acciones</span>
@@ -175,69 +226,92 @@ export default function AssignmentList({
         </thead>
         <tbody className="divide-y divide-gray-100">
           {assignments.map((a) => (
-            <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-              {/* Brigadista */}
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                    {a.user?.full_name ? (
-                      a.user.full_name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
+            <>
+              <tr key={a.id} className="hover:bg-gray-50 transition-colors">
+                {/* Usuario asignado */}
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                      {a.user?.full_name ? (
+                        a.user.full_name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-gray-900">
+                          {a.user?.full_name ?? `Usuario #${a.user_id}`}
+                        </p>
+                        <RoleBadge role={a.user?.role} />
+                      </div>
+                      <p className="text-xs text-gray-500">{a.user?.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {a.user?.full_name ?? `Usuario #${a.user_id}`}
-                    </p>
-                    <p className="text-xs text-gray-500">{a.user?.email}</p>
-                  </div>
-                </div>
-              </td>
+                </td>
 
-              {/* Encuesta */}
-              <td className="px-6 py-4">
-                <p className="text-sm text-gray-900 font-medium">
-                  {a.survey?.title ?? `Encuesta #${a.survey_id}`}
-                </p>
-              </td>
+                {/* Encuesta */}
+                <td className="px-6 py-4">
+                  <p className="text-sm text-gray-900 font-medium">
+                    {a.survey?.title ?? `Encuesta #${a.survey_id}`}
+                  </p>
+                </td>
 
-              {/* Estado */}
-              <td className="px-6 py-4">
-                <StatusBadge status={a.status} />
-              </td>
+                {/* Estado */}
+                <td className="px-6 py-4">
+                  <StatusBadge status={a.status} />
+                </td>
 
-              {/* Zona */}
-              <td className="px-6 py-4">
-                {a.location ? (
-                  <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                    <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                    {a.location}
-                  </div>
-                ) : (
-                  <span className="text-xs text-gray-400 italic">Sin zona</span>
-                )}
-              </td>
+                {/* Zona */}
+                <td className="px-6 py-4">
+                  {a.location ? (
+                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                      <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                      {a.location}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">
+                      Sin zona
+                    </span>
+                  )}
+                </td>
 
-              {/* Fecha */}
-              <td className="px-6 py-4 text-sm text-gray-500">
-                {format(new Date(a.created_at), "d MMM yyyy", { locale: es })}
-              </td>
+                {/* Asignada por */}
+                <td className="px-6 py-4">
+                  {a.assigned_by_user ? (
+                    <div>
+                      <p className="text-sm text-gray-700">
+                        {a.assigned_by_user.full_name}
+                      </p>
+                      <RoleBadge role={a.assigned_by_user.role} />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">—</span>
+                  )}
+                </td>
 
-              {/* Acciones */}
-              <td className="px-6 py-4 text-right">
-                <ActionsMenu
-                  assignment={a}
-                  onUpdateStatus={onUpdateStatus}
-                  onDelete={onDelete}
-                />
-              </td>
-            </tr>
+                {/* Fecha */}
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {format(new Date(a.created_at), "d MMM yyyy", { locale: es })}
+                </td>
+
+                {/* Acciones */}
+                <td className="px-6 py-4 text-right">
+                  <ActionsMenu
+                    assignment={a}
+                    onUpdateStatus={onUpdateStatus}
+                    onDelete={onDelete}
+                  />
+                </td>
+              </tr>
+              {/* Notes sub-row */}
+              {a.notes && <NotesRow key={`notes-${a.id}`} notes={a.notes} />}
+            </>
           ))}
         </tbody>
       </table>
