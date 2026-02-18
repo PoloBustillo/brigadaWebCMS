@@ -1,15 +1,314 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Survey, Question } from "@/types";
+import { surveyService } from "@/lib/api/survey.service";
+import SurveyList from "@/components/survey/survey-list";
+import CreateSurveyModal from "@/components/survey/create-survey-modal";
+import SurveyDetailsModal from "@/components/survey/survey-details-modal";
+import { Plus, Search, Filter, RefreshCw } from "lucide-react";
+
 export default function SurveysPage() {
+  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [editingSurvey, setEditingSurvey] = useState<Survey | null>(null);
+  const [viewingSurvey, setViewingSurvey] = useState<Survey | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(
+    undefined,
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  const loadSurveys = async () => {
+    try {
+      setIsLoading(true);
+      const data = await surveyService.getSurveys({
+        is_active: filterActive,
+      });
+      setSurveys(data);
+    } catch (error) {
+      console.error("Error loading surveys:", error);
+      alert("Error al cargar las encuestas");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSurveys();
+  }, [filterActive]);
+
+  const handleCreateSurvey = async (data: {
+    title: string;
+    description?: string;
+    questions: Omit<Question, "id" | "version_id">[];
+  }) => {
+    try {
+      setIsSaving(true);
+      await surveyService.createSurvey(data);
+      setIsModalOpen(false);
+      await loadSurveys();
+    } catch (error: any) {
+      console.error("Error creating survey:", error);
+      alert(
+        error.response?.data?.detail || "Error al crear la encuesta",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleEditSurvey = async (data: {
+    title: string;
+    description?: string;
+    questions: Omit<Question, "id" | "version_id">[];
+  }) => {
+    if (!editingSurvey) return;
+
+    try {
+      setIsSaving(true);
+      await surveyService.updateSurvey(editingSurvey.id, {
+        ...data,
+        change_summary: "Actualización manual desde CMS",
+      });
+      setIsModalOpen(false);
+      setEditingSurvey(null);
+      await loadSurveys();
+    } catch (error: any) {
+      console.error("Error updating survey:", error);
+      alert(
+        error.response?.data?.detail || "Error al actualizar la encuesta",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteSurvey = async (survey: Survey) => {
+    if (
+      !confirm(
+        `¿Estás seguro de eliminar la encuesta "${survey.title}"? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await surveyService.deleteSurvey(survey.id);
+      await loadSurveys();
+    } catch (error) {
+      console.error("Error deleting survey:", error);
+      alert("Error al eliminar la encuesta");
+    }
+  };
+
+  const handleToggleStatus = async (survey: Survey) => {
+    try {
+      await surveyService.updateSurvey(survey.id, {
+        title: survey.title,
+        description: survey.description,
+      });
+      await loadSurveys();
+    } catch (error) {
+      console.error("Error toggling survey status:", error);
+      alert("Error al cambiar el estado de la encuesta");
+    }
+  };
+
+  const handleView = async (survey: Survey) => {
+    try {
+      const fullSurvey = await surveyService.getSurvey(survey.id);
+      setViewingSurvey(fullSurvey);
+      setIsDetailsModalOpen(true);
+    } catch (error) {
+      console.error("Error loading survey details:", error);
+      alert("Error al cargar los detalles de la encuesta");
+    }
+  };
+
+  const handlePublishVersion = async (versionId: number) => {
+    if (!viewingSurvey) return;
+
+    if (
+      !confirm(
+        "¿Estás seguro de publicar esta versión? Las apps móviles comenzarán a usar esta versión de la encuesta.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsPublishing(true);
+      await surveyService.publishVersion(viewingSurvey.id, versionId);
+      // Reload survey details
+      const updatedSurvey = await surveyService.getSurvey(viewingSurvey.id);
+      setViewingSurvey(updatedSurvey);
+      await loadSurveys();
+    } catch (error: any) {
+      console.error("Error publishing version:", error);
+      alert(
+        error.response?.data?.detail || "Error al publicar la versión",
+      );
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleEdit = async (survey: Survey) => {
+    try {
+      const fullSurvey = await surveyService.getSurvey(survey.id);
+      // Get the latest version's questions
+      const latestVersion = fullSurvey.versions?.sort(
+        (a, b) => b.version_number - a.version_number,
+      )[0];
+
+      if (latestVersion) {
+        setEditingSurvey({
+          ...fullSurvey,
+          versions: [latestVersion],
+        });
+      } else {
+        setEditingSurvey(fullSurvey);
+      }
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error loading survey for edit:", error);
+      alert("Error al cargar la encuesta para editar");
+    }
+  };
+
+  const filteredSurveys = surveys.filter((survey) =>
+    survey.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Encuestas</h1>
-        <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
-          Crear Encuesta
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Encuestas</h1>
+          <p className="text-gray-600 mt-1">
+            Gestiona las encuestas para recopilar información
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            setEditingSurvey(null);
+            setIsModalOpen(true);
+          }}
+          className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+          disabled={isLoading}
+        >
+          <Plus className="h-5 w-5" />
+          Nueva Encuesta
         </button>
       </div>
-      <div className="bg-white rounded-lg shadow">
-        <p className="p-6 text-gray-600">Lista de encuestas...</p>
+
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Search */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar encuestas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        {/* Status filter */}
+        <div className="flex gap-2">
+          <button
+            onClick={() =>
+              setFilterActive(filterActive === undefined ? true : undefined)
+            }
+            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
+              filterActive === true
+                ? "bg-primary-600 text-white border-primary-600"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            <Filter className="h-4 w-4" />
+            Activas
+          </button>
+          <button
+            onClick={() =>
+              setFilterActive(filterActive === undefined ? false : undefined)
+            }
+            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
+              filterActive === false
+                ? "bg-primary-600 text-white border-primary-600"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            <Filter className="h-4 w-4" />
+            Inactivas
+          </button>
+          <button
+            onClick={loadSurveys}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
+          </button>
+        </div>
       </div>
+
+      {/* Survey List */}
+      {isLoading ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <RefreshCw className="mx-auto h-8 w-8 text-primary-600 animate-spin mb-4" />
+          <p className="text-gray-600">Cargando encuestas...</p>
+        </div>
+      ) : (
+        <SurveyList
+          surveys={filteredSurveys}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDeleteSurvey}
+          onToggleStatus={handleToggleStatus}
+        />
+      )}
+
+      {/* Create/Edit Modal */}
+      <CreateSurveyModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingSurvey(null);
+        }}
+        onSubmit={editingSurvey ? handleEditSurvey : handleCreateSurvey}
+        initialData={
+          editingSurvey
+            ? {
+                title: editingSurvey.title,
+                description: editingSurvey.description,
+                questions: editingSurvey.versions?.[0]?.questions || [],
+              }
+            : undefined
+        }
+        isLoading={isSaving}
+      />
+
+      {/* Details Modal */}
+      <SurveyDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setViewingSurvey(null);
+        }}
+        survey={viewingSurvey}
+        onPublish={handlePublishVersion}
+        isPublishing={isPublishing}
+      />
     </div>
   );
 }
+

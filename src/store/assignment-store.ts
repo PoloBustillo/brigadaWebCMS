@@ -1,35 +1,22 @@
 import { create } from "zustand";
-import { Assignment, PaginatedResponse } from "@/types";
+import { Assignment, AssignmentStatus } from "@/types";
 
 interface AssignmentState {
   assignments: Assignment[];
   selectedAssignment: Assignment | null;
   isLoading: boolean;
   error: string | null;
-  filters: {
-    estado?: string;
-    encargado_id?: number;
-    brigadista_id?: number;
-    encuesta_id?: number;
-  };
-  pagination: {
-    page: number;
-    size: number;
-    total: number;
-    pages: number;
-  };
+  filterStatus: AssignmentStatus | "";
 
   // Actions
-  setAssignments: (response: PaginatedResponse<Assignment>) => void;
+  setAssignments: (assignments: Assignment[]) => void;
   setSelectedAssignment: (assignment: Assignment | null) => void;
   addAssignment: (assignment: Assignment) => void;
   updateAssignment: (id: number, assignment: Partial<Assignment>) => void;
   deleteAssignment: (id: number) => void;
-  setFilters: (filters: Partial<AssignmentState["filters"]>) => void;
-  clearFilters: () => void;
+  setFilterStatus: (status: AssignmentStatus | "") => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  setPage: (page: number) => void;
 }
 
 export const useAssignmentStore = create<AssignmentState>((set) => ({
@@ -37,39 +24,22 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   selectedAssignment: null,
   isLoading: false,
   error: null,
-  filters: {},
-  pagination: {
-    page: 1,
-    size: 10,
-    total: 0,
-    pages: 0,
-  },
+  filterStatus: "",
 
-  setAssignments: (response) =>
-    set({
-      assignments: response.items,
-      pagination: {
-        page: response.page,
-        size: response.size,
-        total: response.total,
-        pages: response.pages,
-      },
-    }),
+  setAssignments: (assignments) => set({ assignments }),
 
   setSelectedAssignment: (assignment) =>
     set({ selectedAssignment: assignment }),
 
   addAssignment: (assignment) =>
     set((state) => ({
-      assignments: [...state.assignments, assignment],
+      assignments: [assignment, ...state.assignments],
     })),
 
   updateAssignment: (id, updatedAssignment) =>
     set((state) => ({
-      assignments: state.assignments.map((assignment) =>
-        assignment.id === id
-          ? { ...assignment, ...updatedAssignment }
-          : assignment,
+      assignments: state.assignments.map((a) =>
+        a.id === id ? { ...a, ...updatedAssignment } : a,
       ),
       selectedAssignment:
         state.selectedAssignment?.id === id
@@ -79,24 +49,13 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
 
   deleteAssignment: (id) =>
     set((state) => ({
-      assignments: state.assignments.filter(
-        (assignment) => assignment.id !== id,
-      ),
+      assignments: state.assignments.filter((a) => a.id !== id),
       selectedAssignment:
         state.selectedAssignment?.id === id ? null : state.selectedAssignment,
     })),
 
-  setFilters: (filters) =>
-    set((state) => ({
-      filters: { ...state.filters, ...filters },
-    })),
-
-  clearFilters: () => set({ filters: {} }),
-
+  setFilterStatus: (status) => set({ filterStatus: status }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-  setPage: (page) =>
-    set((state) => ({
-      pagination: { ...state.pagination, page },
-    })),
 }));
+

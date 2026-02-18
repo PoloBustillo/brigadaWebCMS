@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/contexts/theme-context";
 import { formatRoleName } from "@/lib/utils";
@@ -26,6 +28,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, handleLogout } = useAuth();
   const { theme, toggleTheme, mounted } = useTheme();
+  const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
 
@@ -93,12 +96,13 @@ export function Header({ onMenuClick }: HeaderProps) {
         )}
 
         {/* Help */}
-        <button
+        <Link 
+          href="/dashboard/help"
           className="hidden md:block p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           title="Ayuda"
         >
           <HelpCircle className="w-5 h-5" />
-        </button>
+        </Link>
 
         {/* Divider */}
         <div className="hidden md:block w-px h-8 bg-gray-200 dark:bg-gray-700" />
@@ -152,7 +156,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
-                        // Navigate to settings
+                        router.push("/dashboard/settings");
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
@@ -164,9 +168,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                   {/* Logout */}
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-1">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         setShowUserMenu(false);
-                        handleLogout();
+                        await handleLogout();
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >

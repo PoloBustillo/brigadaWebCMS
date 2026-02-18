@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useAuthStore } from "@/store/auth-store";
+import { useTheme } from "@/contexts/theme-context";
 import { AdminGuard } from "@/components/auth/admin-guard";
+import { QuotaDisplay } from "@/components/quota/quota-display";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,7 @@ import {
   Mail,
   User,
   Save,
+  Cloud,
 } from "lucide-react";
 import { userService } from "@/lib/api/user.service";
 
@@ -36,9 +39,10 @@ interface PasswordForm {
 export default function SettingsPage() {
   const { isChecking } = useRequireAuth();
   const currentUser = useAuthStore((state) => state.user);
+  const { theme: currentTheme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "password" | "system">(
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "system" | "services">(
     "profile",
   );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -59,7 +63,7 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    // Simular carga de datos del usuario
+    // Cargar datos del usuario y tema actual
     setTimeout(() => {
       if (currentUser) {
         setFormData((prev) => ({
@@ -67,11 +71,12 @@ export default function SettingsPage() {
           firstName: currentUser.nombre || "",
           lastName: currentUser.apellido || "",
           email: currentUser.email || "",
+          theme: (localStorage.getItem("theme") as "light" | "dark") || currentTheme || "system",
         }));
       }
       setIsLoading(false);
     }, 500);
-  }, [currentUser]);
+  }, [currentUser, currentTheme]);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -86,6 +91,22 @@ export default function SettingsPage() {
       ...prev,
       [name]: value,
     }));
+    
+    // Si cambia el tema, aplicarlo inmediatamente
+    if (name === "theme") {
+      if (value === "light" || value === "dark") {
+        setTheme(value as "light" | "dark");
+        setSuccessMessage("Tema actualizado");
+        setTimeout(() => setSuccessMessage(null), 2000);
+      } else if (value === "system") {
+        // Usar preferencia del sistema
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setTheme(prefersDark ? "dark" : "light");
+        localStorage.removeItem("theme"); // Remover para que use siempre la preferencia del sistema
+        setSuccessMessage("Usando tema del sistema");
+        setTimeout(() => setSuccessMessage(null), 2000);
+      }
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,6 +240,19 @@ export default function SettingsPage() {
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Preferencias
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("services")}
+              className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
+                activeTab === "services"
+                  ? "border-primary-600 text-primary-600 dark:text-primary-400"
+                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Cloud className="w-4 h-4" />
+                Servicios
               </div>
             </button>
           </div>
@@ -408,6 +442,13 @@ export default function SettingsPage() {
               </Button>
             </div>
           </Card>
+        )}
+
+        {/* Services Tab */}
+        {activeTab === "services" && (
+          <div>
+            <QuotaDisplay />
+          </div>
         )}
       </div>
     </AdminGuard>

@@ -1,63 +1,64 @@
 import apiClient from "./client";
-import { Assignment, PaginatedResponse } from "@/types";
+import { Assignment, AssignmentStatus } from "@/types";
 
-interface CreateAssignmentData {
-  encuesta_id: number;
-  encargado_id: number;
-  brigadista_id?: number;
-  direccion: string;
-  coordenadas?: {
-    latitud: number;
-    longitud: number;
-  };
-  fecha_limite: string;
+export interface CreateAssignmentData {
+  user_id: number;
+  survey_id: number;
+  location?: string;
 }
 
-interface UpdateAssignmentData {
-  encargado_id?: number;
-  brigadista_id?: number;
-  direccion?: string;
-  coordenadas?: {
-    latitud: number;
-    longitud: number;
-  };
-  fecha_limite?: string;
-  estado?: string;
+export interface UpdateAssignmentData {
+  status?: AssignmentStatus;
+  location?: string;
 }
 
-interface GetAssignmentsParams {
-  page?: number;
-  size?: number;
-  estado?: string;
-  encargado_id?: number;
-  brigadista_id?: number;
-  encuesta_id?: number;
+export interface GetAssignmentsParams {
+  status?: AssignmentStatus;
+  skip?: number;
+  limit?: number;
 }
 
 export const assignmentService = {
   /**
-   * Get paginated list of assignments
+   * List all assignments with user and survey details (admin view)
    */
-  async getAssignments(
+  async getAssignments(params?: GetAssignmentsParams): Promise<Assignment[]> {
+    const response = await apiClient.get<Assignment[]>("/assignments", {
+      params,
+    });
+    return response.data;
+  },
+
+  /**
+   * Get assignments for a specific user
+   */
+  async getUserAssignments(
+    userId: number,
     params?: GetAssignmentsParams,
-  ): Promise<PaginatedResponse<Assignment>> {
-    const response = await apiClient.get<PaginatedResponse<Assignment>>(
-      "/assignments",
+  ): Promise<Assignment[]> {
+    const response = await apiClient.get<Assignment[]>(
+      `/assignments/user/${userId}`,
       { params },
     );
     return response.data;
   },
 
   /**
-   * Get assignment by ID
+   * Get assignments for a specific survey
    */
-  async getAssignment(id: number): Promise<Assignment> {
-    const response = await apiClient.get<Assignment>(`/assignments/${id}`);
+  async getSurveyAssignments(
+    surveyId: number,
+    params?: GetAssignmentsParams,
+  ): Promise<Assignment[]> {
+    const response = await apiClient.get<Assignment[]>(
+      `/assignments/survey/${surveyId}`,
+      { params },
+    );
     return response.data;
   },
 
   /**
-   * Create new assignment
+   * Create new assignment (brigadista + survey)
    */
   async createAssignment(data: CreateAssignmentData): Promise<Assignment> {
     const response = await apiClient.post<Assignment>("/assignments", data);
@@ -65,13 +66,13 @@ export const assignmentService = {
   },
 
   /**
-   * Update existing assignment
+   * Update assignment status or location
    */
   async updateAssignment(
     id: number,
     data: UpdateAssignmentData,
   ): Promise<Assignment> {
-    const response = await apiClient.put<Assignment>(
+    const response = await apiClient.patch<Assignment>(
       `/assignments/${id}`,
       data,
     );
@@ -83,40 +84,5 @@ export const assignmentService = {
    */
   async deleteAssignment(id: number): Promise<void> {
     await apiClient.delete(`/assignments/${id}`);
-  },
-
-  /**
-   * Assign brigadista to assignment
-   */
-  async assignBrigadista(
-    id: number,
-    brigadistaId: number,
-  ): Promise<Assignment> {
-    const response = await apiClient.post<Assignment>(
-      `/assignments/${id}/assign`,
-      { brigadista_id: brigadistaId },
-    );
-    return response.data;
-  },
-
-  /**
-   * Update assignment status
-   */
-  async updateStatus(id: number, estado: string): Promise<Assignment> {
-    const response = await apiClient.patch<Assignment>(
-      `/assignments/${id}/status`,
-      { estado },
-    );
-    return response.data;
-  },
-
-  /**
-   * Bulk create assignments
-   */
-  async bulkCreate(assignments: CreateAssignmentData[]): Promise<Assignment[]> {
-    const response = await apiClient.post<Assignment[]>("/assignments/bulk", {
-      assignments,
-    });
-    return response.data;
   },
 };

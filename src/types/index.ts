@@ -20,64 +20,105 @@ export interface AuthUser extends User {
   refresh_token?: string;
 }
 
-// Survey types
+// Survey types (matching backend schema)
 export interface Survey {
   id: number;
-  titulo: string;
-  descripcion?: string;
-  version: number;
-  activo: boolean;
-  created_at: string;
-  updated_at: string;
+  title: string;
+  description?: string;
+  is_active: boolean;
   created_by: number;
+  created_at: string;
+  updated_at?: string;
+  versions?: SurveyVersion[];
 }
 
-export interface SurveyQuestion {
+export interface SurveyVersion {
   id: number;
-  encuesta_id: number;
-  pregunta: string;
-  tipo_pregunta: QuestionType;
-  requerido: boolean;
-  orden: number;
-  opciones?: string[];
-  validacion?: Record<string, any>;
-  logica_condicional?: Record<string, any>;
+  survey_id: number;
+  version_number: number;
+  is_published: boolean;
+  change_summary?: string;
+  created_at: string;
+  questions: Question[];
+}
+
+export interface Question {
+  id: number;
+  version_id: number;
+  question_text: string;
+  question_type: QuestionType;
+  order: number;
+  is_required: boolean;
+  validation_rules?: Record<string, any>;
+  options?: AnswerOption[];
+}
+
+export interface AnswerOption {
+  id: number;
+  question_id?: number;
+  option_text: string;
+  order: number;
 }
 
 export type QuestionType =
-  | "texto"
-  | "numero"
-  | "seleccion_unica"
-  | "seleccion_multiple"
-  | "fecha"
-  | "hora"
-  | "coordenadas"
-  | "foto"
-  | "firma"
-  | "documento";
+  // Text inputs
+  | "text"
+  | "textarea"
+  | "email"
+  | "phone"
+  // Numeric
+  | "number"
+  | "slider"
+  | "scale"
+  | "rating"
+  // Choice
+  | "single_choice"
+  | "multiple_choice"
+  | "yes_no"
+  // Date/Time
+  | "date"
+  | "time"
+  | "datetime"
+  // Media & special
+  | "photo"
+  | "file"
+  | "signature"
+  | "location"
+  | "ine_ocr";
+
+// Legacy types (for backward compatibility)
+export interface SurveyQuestion extends Question {
+  encuesta_id?: number;
+  pregunta?: string;
+  tipo_pregunta?: QuestionType;
+  requerido?: boolean;
+  orden?: number;
+  opciones?: string[];
+}
 
 // Assignment types
 export interface Assignment {
   id: number;
-  encuesta_id: number;
-  encargado_id: number;
-  brigadista_id?: number;
-  direccion: string;
-  coordenadas?: {
-    latitud: number;
-    longitud: number;
-  };
-  fecha_limite: string;
-  estado: AssignmentStatus;
+  user_id: number;
+  survey_id: number;
+  assigned_by: number;
+  status: AssignmentStatus;
+  location?: string;
   created_at: string;
+  updated_at?: string;
+  // Populated in list view (AssignmentDetailResponse)
+  user?: {
+    id: number;
+    full_name: string;
+    email: string;
+  };
+  survey?: {
+    id: number;
+    title: string;
+  };
 }
 
-export type AssignmentStatus =
-  | "pendiente"
-  | "asignado"
-  | "en_progreso"
-  | "completado"
-  | "rechazado";
+export type AssignmentStatus = "pending" | "in_progress" | "completed";
 
 // Response types
 export interface SurveyResponse {

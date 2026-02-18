@@ -11,8 +11,6 @@ import {
   HelpCircle,
   Mail,
   MessageSquare,
-  BookOpen,
-  Github,
   Bug,
 } from "lucide-react";
 
@@ -24,9 +22,10 @@ interface IssueForm {
 }
 
 export default function HelpPage() {
-  const [activeTab, setActiveTab] = useState<"faq" | "report" | "docs">("faq");
+  const [activeTab, setActiveTab] = useState<"faq" | "report">("faq");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState<IssueForm>({
     title: "",
     description: "",
@@ -50,21 +49,33 @@ export default function HelpPage() {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      // TODO: Implement actual API call to submit issue
-      // await issueService.submitIssue(formData);
-      setTimeout(() => {
-        setSubmitSuccess(true);
-        setFormData({
-          title: "",
-          description: "",
-          severity: "medium",
-          email: "",
-        });
-        setIsSubmitting(false);
-        setTimeout(() => setSubmitSuccess(false), 5000);
-      }, 500);
-    } catch {
-      alert("Error al enviar el reporte. Por favor intenta de nuevo.");
+      setSubmitError(null);
+
+      const response = await fetch("/api/help/submit-issue", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al enviar el reporte");
+      }
+
+      setSubmitSuccess(true);
+      setFormData({
+        title: "",
+        description: "",
+        severity: "medium",
+        email: "",
+      });
+      setTimeout(() => setSubmitSuccess(false), 5000);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Error al enviar el reporte. Por favor intenta de nuevo."
+      );
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -109,19 +120,6 @@ export default function HelpPage() {
             <div className="flex items-center gap-2">
               <Bug className="w-4 h-4" />
               Reportar Problema
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab("docs")}
-            className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
-              activeTab === "docs"
-                ? "border-primary-600 text-primary-600 dark:text-primary-400"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Documentación
             </div>
           </button>
         </div>
@@ -177,6 +175,13 @@ export default function HelpPage() {
                 Tu reporte ha sido enviado exitosamente. Nuestro equipo lo
                 revisará pronto.
               </p>
+            </div>
+          )}
+
+          {submitError && (
+            <div className="mb-6 flex items-center gap-3 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <p className="text-red-800 dark:text-red-200">{submitError}</p>
             </div>
           )}
 
@@ -275,150 +280,18 @@ export default function HelpPage() {
             <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                <span>soporte@brigada.example.com</span>
+                <span>brigadadigitalmorena@gmail.com</span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 <span>Tiempo de respuesta: 24-48 horas</span>
               </div>
-              <div className="flex items-center gap-3">
-                <Github className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                <span>
-                  <a
-                    href="https://github.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-primary-600 dark:text-primary-400"
-                  >
-                    Ver Issues en GitHub
-                  </a>
-                </span>
-              </div>
             </div>
           </Card>
         </div>
       )}
 
-      {/* Documentation Tab */}
-      {activeTab === "docs" && (
-        <div className="space-y-6 max-w-3xl">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              📚 Documentación General
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Accede a la documentación completa del sistema Brigada CMS.
-            </p>
-            <a
-              href="/docs"
-              className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline"
-            >
-              <BookOpen className="w-4 h-4" />
-              Ir a Documentación
-            </a>
-          </Card>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              🎯 Primeros Pasos
-            </h3>
-            <ul className="space-y-3 text-gray-600 dark:text-gray-400">
-              <li className="flex items-start gap-3">
-                <span className="text-primary-600 dark:text-primary-400 font-semibold mt-0.5">
-                  1.
-                </span>
-                <span>
-                  <strong>Crear una Encuesta:</strong> Ve a Encuestas &gt; Nueva
-                  Encuesta
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-primary-600 dark:text-primary-400 font-semibold mt-0.5">
-                  2.
-                </span>
-                <span>
-                  <strong>Invitar Usuarios:</strong> Ve a Usuarios &gt;
-                  Invitaciones y genera códigos de activación
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-primary-600 dark:text-primary-400 font-semibold mt-0.5">
-                  3.
-                </span>
-                <span>
-                  <strong>Crear Asignaciones:</strong> Ve a Asignaciones para
-                  asignar encuestas a brigadistas
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-primary-600 dark:text-primary-400 font-semibold mt-0.5">
-                  4.
-                </span>
-                <span>
-                  <strong>Ver Reportes:</strong> Ve a Reportes para ver
-                  estadísticas y análisis de respuestas
-                </span>
-              </li>
-            </ul>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              🔐 Información de Seguridad
-            </h3>
-            <div className="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
-              <p>
-                <strong>Autorización:</strong> El sistema utiliza JWT (JSON Web
-                Tokens) para autenticar usuarios.
-              </p>
-              <p>
-                <strong>Contraseñas:</strong> Las contraseñas se almacenan de
-                forma segura usando hash bcrypt.
-              </p>
-              <p>
-                <strong>Roles:</strong> Los permisos se basan en roles de
-                usuario. Cada rol tiene acceso limitado según su nivel.
-              </p>
-              <p>
-                <strong>HTTPS:</strong> Todas las comunicaciones se realizan a
-                través de conexiones encriptadas.
-              </p>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              💡 Tips y Trucos
-            </h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
-              <li>
-                • Usa el atajo Cmd+K (Mac) o Ctrl+K (Windows) para búsqueda
-                rápida
-              </li>
-              <li>• Puedes generar múltiples códigos de invitación a la vez</li>
-              <li>• Los reportes se pueden exportar en formato CSV</li>
-              <li>
-                • Usa temas oscuros para reducir fatiga visual en sesiones
-                largas
-              </li>
-            </ul>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
-            <h3 className="text-lg font-semibold text-green-900 dark:text-green-200 mb-3">
-              ✨ Novedades
-            </h3>
-            <p className="text-green-800 dark:text-green-300 mb-2">
-              <strong>Versión 1.0.0:</strong> Lanzamiento inicial del Brigada
-              CMS
-            </p>
-            <p className="text-green-700 dark:text-green-400 text-sm">
-              Características: Gestión de usuarios, Encuestas, Asignaciones,
-              Reportes y Sistema de Invitaciones
-            </p>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

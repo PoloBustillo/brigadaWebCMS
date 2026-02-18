@@ -1,33 +1,26 @@
 import { create } from "zustand";
-import { Survey, SurveyQuestion, PaginatedResponse } from "@/types";
+import { Survey, Question } from "@/types";
 
 interface SurveyState {
   surveys: Survey[];
   selectedSurvey: Survey | null;
-  surveyQuestions: SurveyQuestion[];
+  surveyQuestions: Question[];
   isLoading: boolean;
   error: string | null;
-  pagination: {
-    page: number;
-    size: number;
-    total: number;
-    pages: number;
-  };
 
   // Actions
-  setSurveys: (response: PaginatedResponse<Survey>) => void;
+  setSurveys: (surveys: Survey[]) => void;
   setSelectedSurvey: (survey: Survey | null) => void;
-  setSurveyQuestions: (questions: SurveyQuestion[]) => void;
+  setSurveyQuestions: (questions: Question[]) => void;
   addSurvey: (survey: Survey) => void;
   updateSurvey: (id: number, survey: Partial<Survey>) => void;
   deleteSurvey: (id: number) => void;
-  addQuestion: (question: SurveyQuestion) => void;
-  updateQuestion: (id: number, question: Partial<SurveyQuestion>) => void;
+  addQuestion: (question: Question) => void;
+  updateQuestion: (id: number, question: Partial<Question>) => void;
   deleteQuestion: (id: number) => void;
-  reorderQuestions: (questions: SurveyQuestion[]) => void;
+  reorderQuestions: (questions: Question[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  setPage: (page: number) => void;
 }
 
 export const useSurveyStore = create<SurveyState>((set) => ({
@@ -36,27 +29,23 @@ export const useSurveyStore = create<SurveyState>((set) => ({
   surveyQuestions: [],
   isLoading: false,
   error: null,
-  pagination: {
-    page: 1,
-    size: 10,
-    total: 0,
-    pages: 0,
-  },
 
-  setSurveys: (response) =>
+  setSurveys: (surveys) =>
     set({
-      surveys: response.items,
-      pagination: {
-        page: response.page,
-        size: response.size,
-        total: response.total,
-        pages: response.pages,
-      },
+      surveys,
+      error: null,
     }),
 
-  setSelectedSurvey: (survey) => set({ selectedSurvey: survey }),
+  setSelectedSurvey: (survey) =>
+    set({
+      selectedSurvey: survey,
+      surveyQuestions: survey?.versions?.[0]?.questions || [],
+    }),
 
-  setSurveyQuestions: (questions) => set({ surveyQuestions: questions }),
+  setSurveyQuestions: (questions) =>
+    set({
+      surveyQuestions: questions,
+    }),
 
   addSurvey: (survey) =>
     set((state) => ({
@@ -88,22 +77,30 @@ export const useSurveyStore = create<SurveyState>((set) => ({
 
   updateQuestion: (id, updatedQuestion) =>
     set((state) => ({
-      surveyQuestions: state.surveyQuestions.map((q) =>
-        q.id === id ? { ...q, ...updatedQuestion } : q,
+      surveyQuestions: state.surveyQuestions.map((question) =>
+        question.id === id ? { ...question, ...updatedQuestion } : question,
       ),
     })),
 
   deleteQuestion: (id) =>
     set((state) => ({
-      surveyQuestions: state.surveyQuestions.filter((q) => q.id !== id),
+      surveyQuestions: state.surveyQuestions.filter(
+        (question) => question.id !== id,
+      ),
     })),
 
-  reorderQuestions: (questions) => set({ surveyQuestions: questions }),
+  reorderQuestions: (questions) =>
+    set({
+      surveyQuestions: questions,
+    }),
 
-  setLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
-  setPage: (page) =>
-    set((state) => ({
-      pagination: { ...state.pagination, page },
-    })),
+  setLoading: (loading) =>
+    set({
+      isLoading: loading,
+    }),
+
+  setError: (error) =>
+    set({
+      error,
+    }),
 }));

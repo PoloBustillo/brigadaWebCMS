@@ -56,13 +56,15 @@ export function useAuth() {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
-      logout();
-
-      // Clear cookies
+      // Clear cookies first
       document.cookie =
         "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
 
-      router.push("/login");
+      // Clear auth state
+      logout();
+
+      // Force full page reload so middleware re-evaluates without the token
+      window.location.href = "/login";
     }
   };
 
