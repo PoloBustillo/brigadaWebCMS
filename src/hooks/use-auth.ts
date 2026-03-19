@@ -29,6 +29,13 @@ export function useAuth() {
       console.log("Attempting login for:", email);
       const authUser = await authService.login({ email, password });
       console.log("Login successful, user:", authUser);
+
+      if (authUser.rol !== "admin") {
+        throw new Error(
+          "Acceso denegado. Este panel solo permite usuarios con rol administrador.",
+        );
+      }
+
       login(authUser);
 
       // Set cookies for middleware

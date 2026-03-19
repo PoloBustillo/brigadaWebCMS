@@ -275,17 +275,17 @@ export default function HelpPage() {
             </form>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20 border border-primary-200 dark:border-primary-800">
+          <Card className="p-6 bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/30 dark:to-blue-900/30 border border-primary-200 dark:border-primary-700">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
               Información de contacto
             </h3>
-            <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+            <div className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                <Mail className="w-4 h-4 text-primary-600 dark:text-primary-300" />
                 <span>brigadadigitalmorena@gmail.com</span>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                <Clock className="w-4 h-4 text-primary-600 dark:text-primary-300" />
                 <span>Tiempo de respuesta: 24-48 horas</span>
               </div>
             </div>
